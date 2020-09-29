@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #define MAXR 20
 #define MAXC 20
@@ -32,11 +33,11 @@ int main(int argc, char* argv[]){
     }
     
     while(1){
-        printf("Inserire dim (1 < dim < min{r, c}): ");
+        printf("Inserire dim (0 < dim < %d): ", min+1);
         scanf("%d", &dim);
         if(dim <= 0 || dim > min){ return -1; }
         
-        max = -1000000000;
+        max = INT_MIN;
         for(i = 0; i <= r - dim; ++i){
             for(j = 0; j <= c - dim; ++j){
                 sum = 0;
@@ -70,5 +71,5 @@ int main(int argc, char* argv[]){
         }
         printf("\n");
     }
-  return 0;
+    return 0;
 }
