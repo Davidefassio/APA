@@ -35,6 +35,7 @@ int main(int argc, char* argv[]){
         fscanf(f, "%s", str);
         sum += conta(str, n);
     }
+    fclose(f);
     
     printf("Somma: %d", sum);
     return 0;
