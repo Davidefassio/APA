@@ -42,6 +42,7 @@ int main(int argc, char* argv[]){
         
         fprintf(o, "%d ", imax);
     }
+    fclose(o);
     
     return 0;
 }
