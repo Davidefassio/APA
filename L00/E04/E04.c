@@ -31,6 +31,7 @@ int main(int argc, char* argv[]){
             fscanf(f, "%d", &mat[i][j]);
         }
     }
+    fclose(f);
     
     while(1){
         printf("Inserire dim (0 < dim < %d): ", min+1);
