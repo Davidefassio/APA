@@ -20,6 +20,11 @@ int main(int argc, char* argv[]){
         max = curr;
     }
     
+    if(max == 0){
+        printf("There are no subsequences.\n");
+        return 0;
+    }
+    
     for(i = 0; i < n; ++i){
         if(vec[i] != 0){
             for(j = i; j < i + max; ++j){
