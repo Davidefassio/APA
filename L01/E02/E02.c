@@ -1,19 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define LSUB 10  // Lunghezza massima della parola da sostituire
 #define LSTR 200 // Lunghezza massima stringa acquisita da sorgente
 
 int substitute(char* word, char* ctrl, char* sub){
-    int i, j, l, cnt = 0, flag = 0;
+    int i, j, l = (int) strlen(ctrl), cnt = 0, flag = 0;
     char tmp[200] = {0};
-    
-    for(i = 0; ctrl[i] != '\0'; ++i){} // Calcolo lunghezza stringa di controllo
-    l = i;
     
     for(i = 0; word[i+l-1] != '\0'; ++i){
         for(j = 0; j < l; ++j){
-            if(word[i+j] != ctrl[j]){ break; }
+            if(word[i+j] != ctrl[j]){
+                break;
+            }
         }
         if(j == l){
             // Sostituisco alla stringa di controllo la stringa da sostituire
@@ -29,12 +29,8 @@ int substitute(char* word, char* ctrl, char* sub){
             ++cnt;
         }
     }
-    // Completo la stringa temporanea con i caratteri finali
-    for(; word[i] != '\0'; ++i, ++cnt){ tmp[cnt] = word[i]; }
-    
-    // Copio la stringa temporanea nella stringa di partenza
-    for(i = 0; tmp[i] != '\0'; ++i){ word[i] = tmp[i]; }
-    word[i] = '\0'; // Setto l'end string
+    strcpy(tmp+cnt, word+i);  // Completo la stringa temporanea con i caratteri finali
+    strcpy(word, tmp);        // Copio la stringa temporanea nella stringa di partenza
     
     return flag; // Flag: (0/false) no sostituzioni, (1/true) sostituzione.
 }
@@ -68,10 +64,13 @@ int main(int argc, char* argv[]){
                 break;
             }
         }
-        if(i == r){ fprintf(o, "%s ", str); } // No sostituzioni, stampo parola iniziale
-        if(c == 10){ fprintf(o, "\n"); } // A capo se necessario
+        if(i == r){ // No sostituzioni, stampo parola iniziale
+            fprintf(o, "%s ", str);
+        }
+        if(c == 10){ // A capo se necessario
+            fprintf(o, "\n");
+        }
     }
-    
     fclose(s);
     fclose(o);
     
