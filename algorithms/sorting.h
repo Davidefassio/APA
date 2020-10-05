@@ -35,7 +35,7 @@ void insertion(int *v, int l){
 
     for(i = 1; i < l; ++i) {
         tmp = v[i];
-        for(j = i - 1; (j >= 0 && v[j] > tmp); --j){
+        for(j = i - 1; j >= 0 && v[j] > tmp; --j){
             v[j + 1] = v[j];
         }
 
