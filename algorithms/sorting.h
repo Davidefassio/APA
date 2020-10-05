@@ -50,8 +50,8 @@ void shell(int *v, int l){
     if(v == NULL){ return ; }
 
     // Sequenza dei gap di Hibbard.
-    // 2^k - 1, k = [1, ceil(log2(l-1)) - 1]
-    int k = ceil(log2((double) l+1)) - 1;
+    // 2^k - 1, k = [1, ceil(log2(l-1)) - 2]
+    int k = ceil(log2((double) l+1)) - 2;
 
     int i, j, nc, nr, cm, *ins;
 
@@ -64,7 +64,7 @@ void shell(int *v, int l){
 
         for(i = 0; i < nc; ++i){
             // Copio la colonna nel vettore
-            for(j = 0; j < nr; ++j){
+            for(j = 0; j < nr && j*nc+i < l; ++j){
                 ins[j] = v[j*nc+i];
             }
 
@@ -72,7 +72,7 @@ void shell(int *v, int l){
             insertion(ins, (nc-i > cm) ? nr : nr-1);
 
             // Sostituisco il vettore ordinato
-            for(j = 0; j < nr; ++j){
+            for(j = 0; j < nr && j*nc+i < l; ++j){
                 v[j*nc+i] = ins[j];
             }
         }
