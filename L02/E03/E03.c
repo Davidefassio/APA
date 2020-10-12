@@ -7,6 +7,13 @@
 #define MAXS   5
 #define MAXL 200
 
+void str_tolower(char *str){
+    int i;
+    for(i = 0; i < strlen(str); ++i){
+        str[i] = tolower(str[i]);
+    }
+}
+
 int main(int argc, char *argv[]){
     FILE *f1, *f2;
     int nr, i, j, cnt = 0;
@@ -29,10 +36,7 @@ int main(int argc, char *argv[]){
     fscanf(f1, "%d", &nr);
     for(i = 0; i < nr; ++i){
         fscanf(f1, "%s", seq[i]);
-
-        for(j = 0; j < strlen(seq[i]); ++j){
-            seq[i][j] = tolower(seq[i][j]);
-        }
+        str_tolower(seq[i]);
     }
     fclose(f1);
 
@@ -50,9 +54,7 @@ int main(int argc, char *argv[]){
             ++cnt; // Parola trovata
 
             // Rendo la parola trovata minuscola
-            for(j = 0; j < strlen(ptr); ++j){
-                ptr[j] = tolower(ptr[j]);
-            }
+            str_tolower(ptr);
 
             for(i = 0; i < nr; ++i){
                 // Se trovo un'istanza di seq[i] in ptr stampo.
