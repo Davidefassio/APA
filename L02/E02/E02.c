@@ -56,6 +56,7 @@ Comando_e leggiComando(){
     else if(strcmp(str, "r_fine") == 0){
         return r_fine;
     }
+    // Comando inserito sbagliato
     exit(EXIT_FAILURE);
 }
 
@@ -130,7 +131,7 @@ void func_ritardo_tot(Corsa cor[], int l, char *cod){
     printf("Ritardo totale: %d\n\n", sum);
 }
 
-// Acquisisce dati aggiungitivi e chiama le funzione per l'elaborazione
+// Acquisisce dati aggiungitivi e chiama le funzione per l'elaborazione e stampa
 void selezionaDati(Comando_e com, Corsa cor[], int l){
     switch (com) {
         case 0: {
@@ -205,12 +206,14 @@ int main(int argc, char* argv[]){
     }
 
     fscanf(f, "%d", &nr);
-
+  
+    // Lettura del file di log
     for(i = 0; i < nr; ++i){
         fscanf(f, "%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d", corse[i].codice_tratta, corse[i].partenza, corse[i].destinazione, &corse[i].date.aaaa, &corse[i].date.gg, &corse[i].date.mm, &corse[i].ora_partenza.hh, &corse[i].ora_partenza.mm, &corse[i].ora_partenza.ss, &corse[i].ora_arrivo.hh, &corse[i].ora_arrivo.mm, &corse[i].ora_arrivo.ss, &corse[i].ritardo);
     }
     fclose(f);
-
+    
+    // Comando possibili
     printf("Comandi possibili:\n");
     printf(" - r_date\n");
     printf(" - r_partenza\n");
@@ -218,7 +221,8 @@ int main(int argc, char* argv[]){
     printf(" - r_ritardo\n");
     printf(" - r_ritardo_tot\n");
     printf(" - r_fine\n\n");
-
+  
+    // Legge in loop i comandi e processa fino a che non viene richiesto r_fine
     while(flag){
         com = leggiComando();
 
