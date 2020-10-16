@@ -7,5 +7,5 @@ Code from the exercises of APA (Algoritmi e programmazione avanzata), 2nd year c
    /   || |_| ||   \
   / /| ||  ___|| |\ \
  / --> || | II | <-- \
-/_/  |_||_|POLI|_|  \_\
+/_/  |_||_|POLI|_|  \_\  by Davide Fassio.
 ```
