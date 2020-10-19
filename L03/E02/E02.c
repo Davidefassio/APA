@@ -17,7 +17,7 @@ void stampaCodifica(void *p, int size, int bigEndian){
                 else if(size ==  4 && i*8 + 7 - j ==  9){ printf("\nMantissa: "); }
                 else if(size ==  8 && i*8 + 7 - j == 12){ printf("\nMantissa: "); }
                 else if(size == 10 && i*8 + 7 - j == 16){ printf("\nMantissa: "); }
-                printf("%d", (*c >> j)&1);
+                printf("%d", (*c >> j)&0x01);
             }
         }
     }
@@ -30,7 +30,7 @@ void stampaCodifica(void *p, int size, int bigEndian){
                 else if(size ==  4 && (size - 1 - i)*8 + 7 - j ==  9){ printf("\nMantissa: "); }
                 else if(size ==  8 && (size - 1 - i)*8 + 7 - j == 12){ printf("\nMantissa: "); }
                 else if(size == 10 && (size - 1 - i)*8 + 7 - j == 16){ printf("\nMantissa: "); }
-                printf("%d", (*c >> j)&1);
+                printf("%d", (*c >> j)&0x01);
             }
         }
     }
