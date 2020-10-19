@@ -10,16 +10,26 @@ void stampaCodifica(void *p, int size, int bigEndian){
     
     if(bigEndian){  // Stampo in ordine crescente di Byte
         c = (unsigned char*) p;
+        printf("Sign: ");
         for(i = 0; i < size; ++i, ++c){
             for(j = 7; j > -1; --j){
+                if(i*8 + 7 - j == 1){ printf("\nExp: "); }
+                else if(size ==  4 && i*8 + 7 - j ==  9){ printf("\nMantissa: "); }
+                else if(size ==  8 && i*8 + 7 - j == 12){ printf("\nMantissa: "); }
+                else if(size == 10 && i*8 + 7 - j == 16){ printf("\nMantissa: "); }
                 printf("%d", (*c >> j)&1);
             }
         }
     }
     else{  // Stampo in ordine decrescente di Byte
         c = ((unsigned char*) p) + size - 1;
+        printf("Sign: ");
         for(i = size - 1; i > -1; --i, --c){
             for(j = 7; j > -1; --j){
+                if((size - 1 - i)*8 + 7 - j == 1){ printf("\nExp: "); }
+                else if(size ==  4 && (size - 1 - i)*8 + 7 - j ==  9){ printf("\nMantissa: "); }
+                else if(size ==  8 && (size - 1 - i)*8 + 7 - j == 12){ printf("\nMantissa: "); }
+                else if(size == 10 && (size - 1 - i)*8 + 7 - j == 16){ printf("\nMantissa: "); }
                 printf("%d", (*c >> j)&1);
             }
         }
@@ -33,11 +43,11 @@ int main(int argc, char *argv[]){
     int b = 1;
     if(*((unsigned char*) &b) & 0x01){
         bigEndian = 0;
-        printf("L'architettura e' little endian\n");
+        printf("L'architettura e' little endian\n\n");
     }
     else{
         bigEndian = 1;
-        printf("L'architettura e' big endian\n");
+        printf("L'architettura e' big endian\n\n");
     }
     
     float af;
