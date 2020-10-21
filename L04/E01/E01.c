@@ -15,9 +15,8 @@ int gcd(int a, int b){
             return 2*gcd(a/2, b/2);
         return gcd(a/2, b);
     }
-    if(b%2 == 0){
+    if(b%2 == 0)
         return gcd(a, b/2);
-    }
     return gcd((a-b)/2, b);
     
 }
