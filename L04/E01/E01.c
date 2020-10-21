@@ -24,8 +24,11 @@ int gcd(int a, int b){
 
 int main(int argc, char *argv[]){
     int x, y;
-    printf("Inserisci due numeri interi positivi:\n");
-    scanf("%d %d", &x, &y);
+    
+    do{
+        printf("Inserisci due numeri interi positivi:\n");
+        scanf("%d %d", &x, &y);
+    } while(x < 0 || y < 0);
     
     printf("GCD: %d\n", gcd(x, y));
     
