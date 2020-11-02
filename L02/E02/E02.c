@@ -5,8 +5,7 @@
 #define MAXS 30
 #define MAXCORSE 1000
 
-typedef enum{r_date, r_partenza, r_capolinea,
-             r_ritardo, r_ritardo_tot, r_fine} Comando_e;
+typedef enum{r_date, r_partenza, r_capolinea, r_ritardo, r_ritardo_tot, r_fine} Comando_e;
 
 typedef struct{ // Formato data: aaaa/gg/mm
     int aaaa;
