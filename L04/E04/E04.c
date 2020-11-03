@@ -55,11 +55,16 @@ int cmp_arrivo(Corsa c1, Corsa c2){
     return strcmp(c1.destinazione, c2.destinazione);
 }
 
+void swap(Corsa *c1, Corsa *c2){
+    Corsa tmp = *c1;
+    *c1 = *c2;
+    *c2 = tmp;
+}
+
 // Implementazione del selection sort che permette il passaggio
 // di varie funzioni di confronto.
-void selectionsort(Corsa cor[], int l, int (*cmp)(Corsa, Corsa)){
+void selectionsort(Corsa *cor, int l, int (*cmp)(Corsa, Corsa)){
     int i, j, imin;
-    Corsa tmp;
     
     for(i = 0; i < l - 1; ++i){
         imin = i;
@@ -68,20 +73,51 @@ void selectionsort(Corsa cor[], int l, int (*cmp)(Corsa, Corsa)){
             if(cmp(cor[j], cor[imin]) < 0)  // cor[j] < cor[imin]
                 imin = j;
         
-        tmp = cor[j];
-        cor[j] = cor[imin];
-        cor[imin] = tmp;
+        if(i != imin)
+            swap(cor + imin, cor + i);
     }
 }
 
 // Stampa su file i log
-void stampa(Corsa cor[], int l, char *nome_file){
-    FILE *fp = fopen(nome_file, "w");
-    if(fp == NULL){ exit(EXIT_FAILURE); }
-    
+void stampa(Corsa *cor, int l, FILE *fp){ 
     int i;
     for(i = 0; i < l; ++i){
-        fprintf(fp, "%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d", cor[i].codice_tratta, cor[i].partenza, cor[i].destinazione, cor[i].data.aaaa, cor[i].data.gg, cor[i].data.mm, cor[i].ora_partenza.hh, cor[i].ora_partenza.mm, cor[i].ora_partenza.ss, cor[i].ora_arrivo.hh, cor[i].ora_arrivo.mm, cor[i].ora_arrivo.ss, cor[i].ritardo);
+        fprintf(fp, "%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d\n", cor[i].codice_tratta, cor[i].partenza, cor[i].destinazione, cor[i].data.aaaa, cor[i].data.gg, cor[i].data.mm, cor[i].ora_partenza.hh, cor[i].ora_partenza.mm, cor[i].ora_partenza.ss, cor[i].ora_arrivo.hh, cor[i].ora_arrivo.mm, cor[i].ora_arrivo.ss, cor[i].ritardo);
+    }
+}
+
+// Ricerca lineare
+void ric_lineare(Corsa *cor, int l, char *part){
+	int i;
+	for(i = 0; i < l; ++i){
+		if(strncmp(cor[i].partenza, part, strlen(part)) == 0){
+			stampa(cor + i, 1, stdout);
+		}
+	}
+}
+
+// Ricerca dicotomica
+void ric_binaria(Corsa *cor, int l, int r, char *part){
+    if(r < l) return;
+    
+    int m = (l + r) / 2;
+    int len = strlen(part);
+    int diff = strncmp(part, cor[m].partenza, len);
+    
+    if(diff < 0)
+        ric_binaria(cor, l, m-1, part);
+    else if(diff > 0)
+        ric_binaria(cor, m+1, r, part);
+    else{
+        int el, er;
+        for(el = m-1; el >= l; --el)
+            if(strncmp(cor[el].partenza, part, len) != 0)
+                break;
+        for(er = m+1; el <= r; ++er)
+            if(strncmp(cor[er].partenza, part, len) != 0)
+                break;
+        ++el;
+        stampa(cor + el, er - el, stdout);
     }
 }
 
@@ -122,47 +158,54 @@ void selezionaDati(Comando_e com, Corsa cor[], int l, int *chiave){
     switch(com){
         case 0:{ // Stampa su file
             char nome_file[20];
+            FILE *fp;
             printf("Inserire nome del file di output (stampa a video = stdout): ");
             scanf("%s", nome_file);
-            stampa(cor, l, nome_file);
+            if(strcmp(nome_file, "stdout") == 0)
+                stampa(cor, l, stdout);
+            else{
+                fp = fopen(nome_file, "w");
+                if(fp == NULL) exit(EXIT_FAILURE);
+                
+                stampa(cor, l, fp);
+            }
             break;
         }
-                   
+            
         case 1: // Ordina per data
             selectionsort(cor, l, cmp_data);
             *chiave = 3;
             break;
-                   
+            
         case 2: // Ordina per codice tratta
             selectionsort(cor, l, cmp_codice);
             *chiave = 0;
             break;
-                   
+            
         case 3: // Ordina per stazione di partenza
             selectionsort(cor, l, cmp_partenza);
             *chiave = 1;
             break;
-                   
+            
         case 4: // Ordina per stazione di arrivo
             selectionsort(cor, l, cmp_arrivo);
             *chiave = 2;
             break;
-                   
+            
         case 5:{ // Ricerca tratta
             char codice[20];
             printf("Inserire codice tratta (o le lettere iniziali) : ");
             scanf("%s", codice);
-          
-            // TODO (anche da scrivere le funzioni)
+            
             if(*chiave == 1){ // Ricerca dicotomica
-                
+                ric_binaria(cor, 0, l-1, codice);
             }
             else{ // Ricerca lineare
-                
+                ric_lineare(cor, l, codice);
             }
             break;
         }
-        
+            
         default:
             exit(EXIT_FAILURE);
             break;
@@ -203,11 +246,11 @@ int main(int argc, char* argv[]){
     while(flag){
         com = leggiComando();
         
-        if(com == fine){
+        if(com == fine)
             flag = 0;
-        }
         else{
             selezionaDati(com, corse, nr, &chiave);
+            printf("\n");
         }
     }
     
