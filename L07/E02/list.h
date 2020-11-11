@@ -29,7 +29,7 @@ int cmp_date(Date d1, Date d2){
 }
 
 typedef struct{
-    char codice[MAXL];
+    char codice[6];
     char nome[MAXL];
     char cognome[MAXL];
     Date data;
@@ -38,52 +38,51 @@ typedef struct{
     int cap;
 }Info;
 
-typedef struct list{
+typedef struct node{
     Info info;
-    struct list *next;
+    struct node *next;
 }Item;
 
 // Returna la testa della lista
-Item* addRow(Item *p, Info inf){
+void addRow(Item **p, Info inf){
     Item *tmp = (Item*) malloc(sizeof(Item));
     tmp->info = inf;
 
-    if(p == NULL){ // Lista vuota
+    if(*p == NULL){ // Lista vuota
         tmp->next = NULL;
-        return tmp;
+        *p = tmp;
+        return;
     }
 
-    int pos = 0;
-    Item *head = p;
-    Item *prev;
+    Item *iter = *p;
+    Item *prev = NULL;
 
-    while(p->next != NULL){
-        if(cmp_date(inf.data, p->info.data) == -1){ // Inserisco
-            if(pos == 0){ // Primo elemento: cambio testa della lista
-                tmp->next = p;
-                return tmp;
+    while(iter->next != NULL){
+        if(cmp_date(inf.data, iter->info.data) == 1){ // Inserisco
+            if(prev == NULL){ // Primo elemento: cambio testa della lista
+                tmp->next = *p;
+                *p = tmp;
+                return;
             }
             else{
                 prev->next = tmp;
-                tmp->next = p;
-                return head;
+                tmp->next = iter;
+                return;
             }
         }
         // Proseguo
-        prev = p;
-        p = p->next;
-        ++pos;
+        prev = iter;
+        iter = iter->next;
     }
-    p->next = tmp;
+    iter->next = tmp;
     tmp->next = NULL;
-    return head;
+    return;
 }
 
-Item* addMult(Item *p, FILE *fp){
+void addMult(Item **p, FILE *fp){
     Info tmp;
-    while(fscanf(fp, "%s %s %s %d/%d/%d %s %s %d\n", tmp.codice, tmp.nome, tmp.cognome, tmp.data.gg, tmp.data.mm, tmp.data.aaaa, tmp.via, tmp.citta, tmp.cap) != 0)
-        p = addRow(p, tmp);
-    return p;
+    while(fscanf(fp, "%s %s %s %d/%d/%d %s %s %d\n", tmp.codice, tmp.nome, tmp.cognome, &tmp.data.gg, &tmp.data.mm, &tmp.data.aaaa, tmp.via, tmp.citta, &tmp.cap) > 0)
+        addRow(p, tmp);
 }
 
 int searchByCode(Item *p, char *code){
@@ -93,18 +92,18 @@ int searchByCode(Item *p, char *code){
             printf("%s %s %s %d/%d/%d %s %s %d\n", p->info.codice, p->info.nome, p->info.cognome, p->info.data.gg, p->info.data.mm, p->info.data.aaaa, p->info.via, p->info.citta, p->info.cap);
             return 1; // Successo
         }
-        p = p->next;                // Avanza nella lista
+        p = p->next;  // Avanza nella lista
     } while(p->next != NULL);
     return 0;
 }
 
 Item* deleteByCode(Item **p, char *code){
     if(p == NULL) return NULL; // Lista vuota
-    int pos = 0;
-    Item *prev, *iter = *p;
-    do{
+
+    Item *prev = NULL, *iter = *p;
+    while(iter != NULL){
         if(strcmp(iter->info.codice, code) == 0){
-            if(pos == 0){ // Cambia la testa della lista
+            if(prev == NULL){ // Cambia la testa della lista
                 *p = iter->next;
                 return iter;
             }
@@ -114,22 +113,69 @@ Item* deleteByCode(Item **p, char *code){
             }
         }
         prev = iter;
-        iter = iter->next; // Avanza nella lista
-        ++pos;           
-    } while(iter->next != NULL);
+        iter = iter->next; // Avanza nella lista         
+    }
     return NULL;
 }
 
-void deleteByDates(Item *p, Date d1, Date d2){
+Item* deleteByDates(Item **p, Date d1, Date d2){
+    if(*p == NULL) return NULL;
 
+    if(cmp_date(d1, d2) == -1){
+        Date dtmp = d1;
+        d1 = d2;
+        d2 = dtmp;
+    }
+
+    int flag = 0;
+    Item *lastIn = NULL, *lastOut = NULL, *prev = NULL;
+    Item *iter = *p;
+
+    while(iter != NULL){
+        if(cmp_date(iter->info.data, d1) <= 0){ // data <= d1
+            if(prev == NULL){
+                flag = 1;
+                lastIn = iter; // Diventa firstOut
+            }
+            else{
+                lastIn = prev;
+            }
+            break;
+        }
+        prev = iter;
+        iter = iter->next;
+    }
+    if(lastIn == NULL) return NULL;
+
+    while(iter != NULL){
+        if(cmp_date(iter->info.data, d2) < 0){ // data < d2
+            if(prev == NULL) return NULL;
+            break;
+        }
+        prev = iter;
+        iter = iter->next;
+    }
+    lastOut = prev;
+
+    if(flag){
+        *p = lastOut->next;
+        prev = lastIn;
+        lastOut->next = NULL;
+    }
+    else{
+        prev = lastIn->next;
+        lastIn->next = lastOut->next;
+        lastOut->next = NULL;
+    }
+    return prev;
 }
 
 void print(Item *p, FILE *fp){
     if(p == NULL) return; // Lista vuota
-    do{
+    while(p != NULL){
         fprintf(fp, "%s %s %s %d/%d/%d %s %s %d\n", p->info.codice, p->info.nome, p->info.cognome, p->info.data.gg, p->info.data.mm, p->info.data.aaaa, p->info.via, p->info.citta, p->info.cap);
         p = p->next;                // Avanza nella lista
-    } while(p->next != NULL);
+    }
 }
 
 #endif /*LIST_H */
