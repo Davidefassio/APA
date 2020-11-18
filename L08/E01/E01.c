@@ -112,57 +112,36 @@ Vector creaCollana(Vector occ){
     return sol;
 }
 
-// Stampa la soluzione sostituendo i numeri con le iniziali della pietra.
-void printSol(Vector sol){
-    int i;
-    for(i = 0; i < sol.len; ++i){
-        switch(sol.data[i]){
-            case 0:
-                printf("Z ");
-                break;
-            
-            case 1:
-                printf("R ");
-                break;
-
-            case 2:
-                printf("T ");
-                break;
-            
-            case 3:
-                printf("S ");
-                break;
-            
-            default:
-                exit(EXIT_FAILURE);
-                break;
-        }
-    }
-    printf("\n");
-    return;
-}
-
-
 int main(int argc, char *argv[]){
-    int i;
+    FILE *fp;
+    char nome_file[30];
+    int i, nr;
     Vector sol, occ;
 
     occ.len = MAXP;
     occ.data = (int*) malloc(occ.len * sizeof(int));
     
-    /**
-     * 0: zaffiri
-     * 1: rubini
-     * 2: topazi
-     * 3: smeraldi
-     */
-    printf("Numero di zaffiri, rubini, topazi e smeraldi:\n");
-    for(i = 0; i < MAXP; ++i)
-        scanf("%d", &occ.data[i]);
+    printf("Inserire nome file: ");
+    scanf("%s", nome_file);
+    fp = fopen(nome_file, "r");
+    if(fp == NULL) exit(EXIT_FAILURE);
 
-    sol = creaCollana(occ);
+    fscanf(fp, "%d", &nr);
 
-    printSol(sol);
+    for(i = 0; i < nr; ++i){
+        fscanf(fp, "%d %d %d %d", &occ.data[0], &occ.data[1], &occ.data[2], &occ.data[3]);
+
+        printf("TEST #%d\n", i+1);
+        printf("zaffiro = %d, ", occ.data[0]);
+        printf("rubino = %d, ", occ.data[1]);
+        printf("topazio = %d, ", occ.data[2]);
+        printf("smeraldo = %d, ", occ.data[3]);
+        printf("TOT = %d\n", occ.data[0] + occ.data[1] + occ.data[2] + occ.data[3]);
+
+        sol = creaCollana(occ);
+
+        printf("Collana massima di lunghezza %d\n", sol.len);
+    }
 
     free(occ.data);
     free(sol.data);
