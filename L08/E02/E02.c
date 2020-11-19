@@ -7,7 +7,7 @@ typedef struct{
     int *data;
     int len;
     int value;
-    int cntZ, cntS;
+    int cntZ, cntS; // Evita il passaggio sul vettore ogni volta
 }Vector;
 
 // 1 = tutti zero.
@@ -16,23 +16,12 @@ int isZero(int *occ){
     return occ[0] == 0 && occ[1] == 0 && occ[2] == 0 && occ[3] == 0;
 }
 
-int isZaffltSmer(Vector v){
-    int z = 0, s = 0, i;
-    for(i = 0; i < v.len; ++i){
-        if(v.data[i] == 0)
-            ++z;
-        else if(v.data[i] == 3)
-            ++s;
-    }
-    return (z <= s) ? 1 : 0;
-}
-
 // Il Vector sol e' passato by reference per permettere il cambio di sol->len.
 // Il puntatore perf serve a bloccare ogni azione dopo aver
 // trovato una soluzione che utilizza tutte le pietre.
 void creaCollanaR(int *occ, Vector *sol, Vector tmp, int pos, int maxr, int prev, int rep, int *perf){
-    if(isZero(occ)){
-        if(isZaffltSmer(tmp)){
+    if(isZero(occ)){ // Finito le pietre
+        if(tmp.cntZ <= tmp.cntS){ // Devo avere piu smeraldi che zaffiri
             sol->len = pos;
             sol->value = tmp.value;
             *perf = 1;
@@ -41,30 +30,34 @@ void creaCollanaR(int *occ, Vector *sol, Vector tmp, int pos, int maxr, int prev
         return;
     }
 
+    // Pruning
+    // Non ho abbastanza smeraldi da aggiungere per compensare gli zaffiri
     if(tmp.cntZ > tmp.cntS + occ[3])
         return;
 
     if((pos == 0 || tmp.data[pos-1] % 2 == 0) && occ[0] > 0){ // Zaffiri
-        --occ[0];
-        tmp.data[pos] = 0;
-        ++tmp.len;
-        tmp.value += occ[4];
-        ++tmp.cntZ;
+        --occ[0]; // Tolgo un'occorrenza
+        tmp.data[pos] = 0; // Inserisco la pietra nella soluzione temporanea
+        ++tmp.len; // Incremento la lunghezza della soluzione temporanea
+        tmp.value += occ[4]; // Incremento il valore
+        ++tmp.cntZ; // Incremento il conteggio degli zaffiri
 
-        if(prev == 0){
-            if(rep < maxr - 1){
+        if(prev == 0){ // La pietra prima era uno zaffiro
+            if(rep < maxr - 1){ // Ho raggiunto maxrip
                 creaCollanaR(occ, sol, tmp, pos+1, maxr, 0, rep+1, perf);
             }
         }
-        else{
+        else{ // La pietra prima non era uno zaffiro
             creaCollanaR(occ, sol, tmp, pos+1, maxr, 0, 0, perf);
         }
 
+        // Backtracking
         --tmp.cntZ;
         tmp.value -= occ[4];
         --tmp.len;
         ++occ[0];
 
+        // Se ho una collana perfetta ritorno direttamente
         if(*perf)
             return;
     }
@@ -137,7 +130,8 @@ void creaCollanaR(int *occ, Vector *sol, Vector tmp, int pos, int maxr, int prev
             return;
     }
 
-    if(tmp.value > sol->value && isZaffltSmer(tmp)){
+    // Il valore deve essere migliore e deve valere sempre zaffiri <= smeraldi.
+    if(tmp.value > sol->value && tmp.cntZ <= tmp.cntS){
         sol->len = pos;
         sol->value = tmp.value;
         memcpy(sol->data, tmp.data, tmp.len * sizeof(int));
@@ -155,11 +149,10 @@ Vector creaCollana(int *occ, int maxr){
     tmp.data = (int*) malloc(sum * sizeof(int));
     sol.data = (int*) malloc(sum * sizeof(int));
 
-
     creaCollanaR(occ, &sol, tmp, 0, maxr, -1, 0, &perfection);
 
     free(tmp.data);
-    return sol;
+    return sol; // sol.data verra' liberata dal chiamante.
 }
 
 // Stampa a schermo la collana sostituendo i numeri
