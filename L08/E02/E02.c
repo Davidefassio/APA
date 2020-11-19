@@ -10,17 +10,11 @@ typedef struct{
     int cntZ, cntS; // Evita il passaggio sul vettore ogni volta
 }Vector;
 
-// 1 = tutti zero.
-// 0 = tutti gli altri casi.
-int isZero(int *occ){
-    return occ[0] == 0 && occ[1] == 0 && occ[2] == 0 && occ[3] == 0;
-}
-
 // Il Vector sol e' passato by reference per permettere il cambio di sol->len.
 // Il puntatore perf serve a bloccare ogni azione dopo aver
 // trovato una soluzione che utilizza tutte le pietre.
 void creaCollanaR(int *occ, Vector *sol, Vector tmp, int pos, int maxr, int prev, int rep, int *perf){
-    if(isZero(occ)){ // Finito le pietre
+    if(occ[0] == 0 && occ[1] == 0 && occ[2] == 0 && occ[3] == 0){ // Finito le pietre
         if(tmp.cntZ <= tmp.cntS){ // Devo avere piu smeraldi che zaffiri
             sol->len = pos;
             sol->value = tmp.value;
