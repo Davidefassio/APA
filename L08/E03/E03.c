@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define MAXL 50 // Lunghezza massima delle stringhe
 
@@ -54,11 +55,13 @@ typedef struct{
     int nPg;
 }tabPg_t;
 
-// Prototipi
+// Prototipi.
+// Tutte le funzioni sottostanti ritornano 0 se tutto OK, 1 altrimenti.
 nodoPg_t* addNodoInTesta(nodoPg_t*, pg_t); // Mi passi la testa e io la returno cambiata + payload.
-void delNodo(nodoPg_t**, nodoPg_t**, char*); // Mi passi i puntatori a testa e coda e io li cambio + codice personaggio.
-void delOggetto(nodoPg_t*, char*, char*); // La testa resta costante + codice personaggio + nome oggetto.
-int* calcStat(nodoPg_t*, char*); // La testa resta costante + codice personaggio. Returno un vettore con le stats.
+int delNodo(nodoPg_t**, nodoPg_t**, char*); // Mi passi i puntatori a testa e coda e io li cambio + codice personaggio.
+int addOggetto(nodoPg_t*, char*, inv_t); // Mi passi il puntatore in testa + codice personaggio + strict dell'oggetto.
+int delOggetto(nodoPg_t*, char*, char*); // La testa resta costante + codice personaggio + nome oggetto.
+int calcStat(nodoPg_t*, char*, int*); // La testa resta costante + codice personaggio + vettore con le stats da restituire.
 
 int main(int argc, char *argv[]){
     int i;
@@ -103,6 +106,71 @@ int main(int argc, char *argv[]){
 
     fclose(fp); // Chiusura file personaggi.
 
+    // Menu a scelta
+    printf("Comandi possibili:\n");
+    printf("  1) Aggiungi personaggio. (Esempio: 1 PG0200 Samira Combattente 2003 71 116 65 41 49)\n");
+    printf("  2) Elimina personaggio.  (Esempio: 2 PG0200)\n");
+    printf("  3) Aggiungi oggetto a un personaggio. (Esempio: 3 PG0200 MangiaMagia Veste 0 0 120 0 0 50)\n");
+    printf("  4) Elimina oggetto a un personaggio.  (Esempio: 4 PG0200 MangiaMagia)\n");
+    printf("  5) Calcola statistiche di un personaggio. (Esempio: 5 PG0200)\n");
+    printf("  0) Chiudi programma.\n\n");
+
+    char str[150], tmpStr[20];
+    int stats[6];
+
+    while(1){
+        fgets(str, 150, stdin);
+
+        switch(str[0]){
+        case 48: // 0
+            return 0;
+            break;
+
+        case 49: // 1
+            // Legge dalla stringa il personaggio e inizializza equip.
+            sscanf(str+2, "%s %s %s %d %d %d %d %d %d", tmp.codice, tmp.nome, tmp.classe, &tmp.stat.hp, &tmp.stat.mp, &tmp.stat.atk, &tmp.stat.def, &tmp.stat.mag, &tmp.stat.spr);
+            tmp.equip = (tabEquip_t*) malloc(sizeof(tabEquip_t));
+            tmp.equip->inUso = 0;
+
+            // Aggiungo in testa il nuovo personaggio.
+            tabPg->headPg = addNodoInTesta(tabPg->headPg, tmp);
+            break;
+
+        case 50: // 2
+            sscanf(str+2, "%s", tmpStr);
+
+            if(delNodo(&(tabPg->headPg), &(tabPg->tailPg), tmpStr) == 0)
+                printf("Eliminazione eseguita con successo.\n");
+            else
+                printf("Eliminazione fallita.\n");
+
+            break;
+
+        case 51: // 3
+            break;
+
+        case 52: // 4
+            break;
+
+        case 53: // 5
+            sscanf(str+2, "%s", tmpStr);
+
+            if(calcStat(tabPg->headPg, tmpStr, stats) == 0){
+                for(i = 0; i < 6; ++i)
+                    printf("%d ", stats[i]);
+                printf("\n");
+            }
+            else{
+                printf("Personaggio non trovato.\n");
+            }
+            break;
+
+        default:
+            exit(EXIT_FAILURE);
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -116,4 +184,88 @@ nodoPg_t* addNodoInTesta(nodoPg_t *head, pg_t payload){
     head->pg = payload;
     head->next = tmp;
     return head;
+}
+
+// Elimina un nodo (personaggio) dalla lista e libera la memoria.
+int delNodo(nodoPg_t **head, nodoPg_t **tail, char *codPers){
+    if(*head == NULL && *tail == NULL){ // Lista vuota.
+        return 1;
+    }
+    if(*head == *tail){ // Lista con un elemento.
+        if(strcmp((*head)->pg.codice, codPers) == 0){
+            free((*head)->pg.equip);
+            free(*head);
+            *head = *tail = NULL; // Diventa una lista vuota.
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
+    // Lista con piu elementi.
+    nodoPg_t *tmp, *prev;
+    if(strcmp((*head)->pg.codice, codPers) == 0){ // Primo elemento.
+        tmp = (*head)->next;
+        free((*head)->pg.equip);
+        free(*head);
+        *head = tmp;
+        return 0;
+    }
+    prev = *head;
+    tmp = (*head)->next;
+
+    while(tmp->next != NULL){
+        if(strcmp(tmp->pg.codice, codPers) == 0){ // Elemento in mezzo
+            prev->next = tmp->next;
+            free(tmp->pg.equip);
+            free(tmp);
+            return 0;
+        }
+    }
+
+    if(strcmp(tmp->pg.codice, codPers) == 0){ // Ultimo elemento
+        prev->next = NULL;
+        free(tmp->pg.equip);
+        free(tmp);
+        *tail = prev;
+        return 0;
+    }
+
+    return 1; // Non trovato
+}
+
+// Calcolo le statistiche di un personaggio.
+// Modifica il vettor stat.
+int calcStat(nodoPg_t *head, char *codPers, int *stat){
+    int i;
+    while(head != NULL){ // Traverso la lista fino alla fine
+        if(strcmp(head->pg.codice, codPers) == 0){
+            // Inizializzo il vettorecon le stat del personaggio.
+            stat[0] = head->pg.stat.hp;
+            stat[1] = head->pg.stat.mp;
+            stat[2] = head->pg.stat.atk;
+            stat[3] = head->pg.stat.def;
+            stat[4] = head->pg.stat.mag;
+            stat[5] = head->pg.stat.spr;
+
+            // Per ogni oggetto nell'inventario sommo le stat.
+            for(i = 0; i < head->pg.equip->inUso; ++i){
+                stat[0] += head->pg.equip->vettEq[i]->stat.hp;
+                stat[1] += head->pg.equip->vettEq[i]->stat.mp;
+                stat[2] += head->pg.equip->vettEq[i]->stat.atk;
+                stat[3] += head->pg.equip->vettEq[i]->stat.def;
+                stat[4] += head->pg.equip->vettEq[i]->stat.mag;
+                stat[5] += head->pg.equip->vettEq[i]->stat.spr;
+            }
+
+            // Azzero le stat negative
+            for(i = 0; i < 6; ++i)
+                if(stat[i] < 0)
+                    stat[i] = 0;
+
+            return 0; // Tutto a posto.
+        }
+        head = head->next;
+    }
+    return 1; // Non ho trovato il personaggio.
 }
