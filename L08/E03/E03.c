@@ -59,8 +59,8 @@ typedef struct{
 // Tutte le funzioni sottostanti ritornano 0 se tutto OK, 1 altrimenti.
 nodoPg_t* addNodoInTesta(nodoPg_t*, pg_t); // Mi passi la testa e io la returno cambiata + payload.
 int delNodo(nodoPg_t**, nodoPg_t**, char*); // Mi passi i puntatori a testa e coda e io li cambio + codice personaggio.
-int addOggetto(nodoPg_t*, char*, inv_t); // Mi passi il puntatore in testa + codice personaggio + strict dell'oggetto.
-int delOggetto(nodoPg_t*, char*, char*); // La testa resta costante + codice personaggio + nome oggetto.
+int addOggetto(nodoPg_t*, char*, tabInv_t, char*); // Mi passi il puntatore in testa + codice personaggio + vettore di oggetti + nome oggetto.
+int delOggetto(nodoPg_t*, char*, tabInv_t, char*); // La testa resta costante + codice personaggio + vettore di oggetti + nome oggetto.
 int calcStat(nodoPg_t*, char*, int*); // La testa resta costante + codice personaggio + vettore con le stats da restituire.
 
 int main(int argc, char *argv[]){
@@ -102,6 +102,7 @@ int main(int argc, char *argv[]){
             tabPg->tailPg = tabPg->headPg;
             ++i;
         }
+        ++(tabPg->nPg);
     }
 
     fclose(fp); // Chiusura file personaggi.
@@ -110,20 +111,22 @@ int main(int argc, char *argv[]){
     printf("Comandi possibili:\n");
     printf("  1) Aggiungi personaggio. (Esempio: 1 PG0200 Samira Combattente 2003 71 116 65 41 49)\n");
     printf("  2) Elimina personaggio.  (Esempio: 2 PG0200)\n");
-    printf("  3) Aggiungi oggetto a un personaggio. (Esempio: 3 PG0200 MangiaMagia Veste 0 0 120 0 0 50)\n");
+    printf("  3) Aggiungi oggetto a un personaggio. (Esempio: 3 PG0200 MangiaMagia)\n");
     printf("  4) Elimina oggetto a un personaggio.  (Esempio: 4 PG0200 MangiaMagia)\n");
     printf("  5) Calcola statistiche di un personaggio. (Esempio: 5 PG0200)\n");
     printf("  0) Chiudi programma.\n\n");
 
-    char str[150], tmpStr[20];
+    char str[150], tmpStr[MAXL+1];
     int stats[6];
+    inv_t tmpInv;
 
     while(1){
+        printf("Inserire comando: ");
         fgets(str, 150, stdin);
 
         switch(str[0]){
         case 48: // 0
-            return 0;
+            return 0; // Fine programma.
             break;
 
         case 49: // 1
@@ -147,9 +150,24 @@ int main(int argc, char *argv[]){
             break;
 
         case 51: // 3
+            sscanf(str+2, "%s %s", tmpStr, tmpInv.nome);
+
+            if(addOggetto(tabPg->headPg, tmpStr, *tabInv, tmpInv.nome) == 0)
+                printf("Aggiunta eseguita con successo.\n");
+            else
+                printf("Aggiunta fallita.\n");
+
             break;
 
         case 52: // 4
+            sscanf(str+2, "%s %s", tmpStr, tmpInv.nome);
+
+            if(delOggetto(tabPg->headPg, tmpStr, *tabInv, tmpInv.nome) == 0)
+                printf("Aggiunta eseguita con successo.\n");
+            else
+                printf("Aggiunta fallita.\n");
+
+            break;
             break;
 
         case 53: // 5
@@ -165,13 +183,14 @@ int main(int argc, char *argv[]){
             }
             break;
 
-        default:
+        default: // Comando errato.
             exit(EXIT_FAILURE);
             break;
         }
+        printf("\n");
     }
 
-    return 0;
+    return 0; // Non dovrei mai arrivare a questo ruturn.
 }
 
 // Aggiungi un nodo in testa.
@@ -232,6 +251,49 @@ int delNodo(nodoPg_t **head, nodoPg_t **tail, char *codPers){
     }
 
     return 1; // Non trovato
+}
+
+// Aggiunge un oggetto all'inventario del personaggio.
+int addOggetto(nodoPg_t *head, char *codPers, tabInv_t tab, char *nomeOgg){
+    int i;
+    for(i = 0; i < tab.nInv; ++i)
+        if(strcmp(tab.vettInv[i].nome, nomeOgg) == 0)
+            break;
+
+    if(i == tab.nInv) // Oggetto non trovato.
+        return 1;
+
+    while(head != NULL){ // Traverso la lista fino alla fine
+        if(strcmp(head->pg.codice, codPers) == 0){
+            if(head->pg.equip->inUso == 8)
+                return 1; // Inventario pieno.
+
+            // Assegno il puntatore e incremento il numero di oggetti in uso.
+            head->pg.equip->vettEq[head->pg.equip->inUso] = tab.vettInv + i;
+            ++(head->pg.equip->inUso);
+            return 0; // Successo!
+        }
+        head = head->next;
+    }
+    return 1; // Non ho trovato il personaggio.
+}
+
+// Elimina un oggetto dall'inventario del personaggio.
+int delOggetto(nodoPg_t *head, char *codPers, tabInv_t tab, char *nomeOgg){
+    int i;
+    while(head != NULL){ // Traverso la lista fino alla fine
+        if(strcmp(head->pg.codice, codPers) == 0){ // Trovato il personaggio
+            for(i = 0; i < head->pg.equip->inUso; ++i){ // Ciclo sull'inventario
+                if(strcmp(head->pg.equip->vettEq[i]->nome, nomeOgg) == 0){ // Trovato l'oggetto
+                    // Scambio l'oggetto con l'ultimo e decremento il numero di oggetti in uso.
+                    head->pg.equip->vettEq[i] = head->pg.equip->vettEq[--(head->pg.equip->inUso)];
+                    return 0; // Successo!
+                }
+            }
+        }
+        head = head->next;
+    }
+    return 1; // Non ho trovato il personaggio.
 }
 
 // Calcolo le statistiche di un personaggio.
