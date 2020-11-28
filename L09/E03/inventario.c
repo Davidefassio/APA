@@ -1,1 +1,1 @@
-int abc;
+#include "inventario.h"
