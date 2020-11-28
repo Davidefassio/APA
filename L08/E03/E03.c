@@ -190,7 +190,7 @@ int main(int argc, char *argv[]){
         printf("\n");
     }
 
-    return 0; // Non dovrei mai arrivare a questo ruturn.
+    return 0; // Non dovrei mai arrivare a questo return.
 }
 
 // Aggiungi un nodo in testa.
