@@ -1,7 +1,41 @@
 #include "personaggi.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+
+
+tabPg_t* acqFilePers(char *str){
+    // Lettura file dei personaggi
+    FILE *fp = fopen("pg.txt", "r");
+    if(fp == NULL) exit(EXIT_FAILURE);
+
+    tabPg_t *tabPg = (tabPg_t*) malloc(sizeof(tabPg_t));
+    tabPg->headPg = tabPg->tailPg = NULL;
+    tabPg->nPg = 0;
+
+    pg_t tmp;
+
+    int i = 0;
+    while(fscanf(fp, "%s %s %s %d %d %d %d %d %d", tmp.codice, tmp.nome, tmp.classe, &tmp.stat.hp, &tmp.stat.mp, &tmp.stat.atk, &tmp.stat.def, &tmp.stat.mag, &tmp.stat.spr) > 0){
+        // Completo l'inizializzazione di tmp.
+        tmp.equip = (tabEquip_t*) malloc(sizeof(tabEquip_t));
+        tmp.equip->inUso = 0;
+
+        // Cambio ogni volta la testa.
+        // La coda la assegno solo la prima volta.
+        tabPg->headPg = addNodoInTesta(tabPg->headPg, tmp);
+        if(i == 0){
+            tabPg->tailPg = tabPg->headPg;
+            ++i;
+        }
+        ++(tabPg->nPg);
+    }
+
+    fclose(fp); // Chiusura file personaggi.
+
+    return tabPg;
+}
 
 // Aggiungi un nodo in testa.
 // La head cambia sempre.
@@ -106,38 +140,19 @@ int delOggetto(nodoPg_t *head, char *codPers, tabInv_t tab, char *nomeOgg){
     return 1; // Non ho trovato il personaggio.
 }
 
-// Calcolo le statistiche di un personaggio.
-// Modifica il vettor stat.
-int calcStat(nodoPg_t *head, char *codPers, int *stat){
+// Stampa un personaggio e il suo equipaggiamento.
+void stampaPers(nodoPg_t *head, char *codPers){
     int i;
     while(head != NULL){ // Traverso la lista fino alla fine
         if(strcmp(head->pg.codice, codPers) == 0){
-            // Inizializzo il vettorecon le stat del personaggio.
-            stat[0] = head->pg.stat.hp;
-            stat[1] = head->pg.stat.mp;
-            stat[2] = head->pg.stat.atk;
-            stat[3] = head->pg.stat.def;
-            stat[4] = head->pg.stat.mag;
-            stat[5] = head->pg.stat.spr;
+            printf("%s %s %s %d %d %d %d %d %d\n", head->pg.codice, head->pg.nome, head->pg.classe, head->pg.stat.hp, head->pg.stat.mp, head->pg.stat.atk, head->pg.stat.def, head->pg.stat.mag, head->pg.stat.spr);
 
-            // Per ogni oggetto nell'inventario sommo le stat.
-            for(i = 0; i < head->pg.equip->inUso; ++i){
-                stat[0] += head->pg.equip->vettEq[i]->stat.hp;
-                stat[1] += head->pg.equip->vettEq[i]->stat.mp;
-                stat[2] += head->pg.equip->vettEq[i]->stat.atk;
-                stat[3] += head->pg.equip->vettEq[i]->stat.def;
-                stat[4] += head->pg.equip->vettEq[i]->stat.mag;
-                stat[5] += head->pg.equip->vettEq[i]->stat.spr;
-            }
+            for(i = 0; i < head->pg.equip->inUso; ++i)
+                printf("%d) %s %s %d %d %d %d %d %d\n", i+1, head->pg.equip->vettEq[i]->nome, head->pg.equip->vettEq[i]->tipo, head->pg.equip->vettEq[i]->stat.hp, head->pg.equip->vettEq[i]->stat.mp, head->pg.equip->vettEq[i]->stat.atk, head->pg.equip->vettEq[i]->stat.def, head->pg.equip->vettEq[i]->stat.mag, head->pg.equip->vettEq[i]->stat.spr);
 
-            // Azzero le stat negative
-            for(i = 0; i < 6; ++i)
-                if(stat[i] < 0)
-                    stat[i] = 0;
-
-            return 0; // Tutto a posto.
+            return;
         }
         head = head->next;
     }
-    return 1; // Non ho trovato il personaggio.
+    printf("Personaggio non trovato.\n");
 }
