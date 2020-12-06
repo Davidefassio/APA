@@ -32,10 +32,11 @@ typedef struct{
 }tabPg_t;
 
 // Prototipi funzioni.
+tabPg_t* acqFilePers(char*); // Mi passi il nome del file e io returno puntatore a tabella.
 nodoPg_t* addNodoInTesta(nodoPg_t*, pg_t); // Mi passi la testa e io la returno cambiata + payload.
 int delNodo(nodoPg_t**, nodoPg_t**, char*); // Mi passi i puntatori a testa e coda e io li cambio + codice personaggio.
 int addOggetto(nodoPg_t*, char*, tabInv_t, char*); // Mi passi il puntatore in testa + codice personaggio + vettore di oggetti + nome oggetto.
 int delOggetto(nodoPg_t*, char*, tabInv_t, char*); // La testa resta costante + codice personaggio + vettore di oggetti + nome oggetto.
-int calcStat(nodoPg_t*, char*, int*); // La testa resta costante + codice personaggio + vettore con le stats da restituire.
+void stampaPers(nodoPg_t*, char*); // La testa resta costante + codice personaggio.
 
 #endif /* PERSONAGGI_H_INCLUDED */
