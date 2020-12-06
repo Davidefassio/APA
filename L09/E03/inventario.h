@@ -27,5 +27,7 @@ typedef struct{
 }tabInv_t;
 
 // Prototipi funzioni.
+tabInv_t* acqFileOgg(char*); // Mi passi il nome del file e io returno puntatore a tabella.
+void stampaOgg(tabInv_t*, char*); // Stampa un oggetto sapendo il nome.
 
 #endif /* INVENTARIO_H_INCLUDED */
