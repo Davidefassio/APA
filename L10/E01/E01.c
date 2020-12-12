@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
 void attSel(Att *att, int n, int *sol){
     // Ordino per ordine crescente dei tempi di fine il vettore delle attivita
     qsort(att, n, sizeof(Att), cmp_att);
-    
+
     // Dichiaro le variabili
     int i, j, max, imax, lmax = INT_MIN, limax = -1, flag;
     int *len = (int*) malloc(n * sizeof(int));
@@ -55,12 +55,12 @@ void attSel(Att *att, int n, int *sol){
     // Algoritmo
     len[0] = att[0].dur;
     sol[0] = -1;
-    
+
     for(i = 1; i < n; ++i){
         flag = 1;
         max = INT_MIN;
         imax = -1;
-        
+
         // Compatibilita indietro e ricerca della sequenza ottimale
         for(j = i-1; j >= 0; --j){
             if(compatible(att[i], att[j]) && len[j] + att[i].dur > max){
@@ -69,28 +69,28 @@ void attSel(Att *att, int n, int *sol){
                 imax = j;
             }
         }
-        
+
         // Trovata compatibilita o meno
-        if(flag){
+        if(flag){ // no comp
             len[i] = att[i].dur;
             sol[i] = -1;
         }
-        else{
-            len[i] = max + att[i].dur;
+        else{ // comp
+            len[i] = max;
             sol[i] = imax;
         }
-        
+
         // Aggiornamento della sequenza massima
         if(len[i] > lmax){
             lmax = len[i];
             limax = i;
         }
     }
-    
+
     // Stampa
     printf("Durata massima: %d\n", lmax);
     printSeq(att, sol, n, limax);
-    
+
     // Free
     free(len);
 }
