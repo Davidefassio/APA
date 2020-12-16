@@ -49,8 +49,8 @@ Nota Bene:
 
 1) TUTTI DIVERSI DA ZERO:
     - se R == T ==> len = Z + R + T + S, coll = ZZ...ZZ|RTRT..RTR|SS...SS|T
-    - se R > T  ==> len = Z + 2R + S + 1, coll = ZZ...ZZ|RT...TR|SS...SS
-    - se T > R  ==> len = Z + 2T + S + 1, coll = SS...SS|TR...RT|ZZ...ZZ
+    - se R > T  ==> len = Z + 2T + S + 1, coll = ZZ...ZZ|RT...TR|SS...SS
+    - se T > R  ==> len = Z + 2R + S + 1, coll = SS...SS|TR...RT|ZZ...ZZ
 
 2) Z == 0
     - se R == T ==> len = R + T + S, coll = RT..RTR|SS...SS|T
