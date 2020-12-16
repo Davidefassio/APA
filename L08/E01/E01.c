@@ -45,7 +45,7 @@ Nota Bene:
     - I tre puntini indicano che la sequenza precedente si ripete
       fino all'esurimento delle pietre coinvolte.
     - Quando si indica ad esempio Z == 0 si presuppone che
-      tutt gli altri siano diversi da zero.
+      tutti gli altri siano diversi da zero.
 
 1) TUTTI DIVERSI DA ZERO:
     - se R == T ==> len = Z + R + T + S, coll = ZZ...ZZ|RTRT..RTR|SS...SS|T
