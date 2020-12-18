@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     fclose(fin);
   
 #if DBG
-    pgList_print(stdout, pgList);
+    pgList_print(stdout, pgList, invArray);
     invArray_print(stdout, invArray);
 #endif /* DBG */
 
