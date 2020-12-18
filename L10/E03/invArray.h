@@ -10,7 +10,7 @@
 /* ADT di prima classe collezione di oggetti di inventario */
 typedef struct invArray_s *invArray_t;
 
-/* creatore e disruttore */
+/* creatore e distruttore */
 invArray_t invArray_init(void);
 void invArray_free(invArray_t invArray);
 
