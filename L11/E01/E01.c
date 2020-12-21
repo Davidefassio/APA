@@ -228,3 +228,158 @@ void generaProgramma(elemArray arr, int dd, int dp){
     
     stampaSol(arr);
 }
+
+/*
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#define MAXL 100
+#define NDIA 3
+#define NELE 5
+#define BONUS 8.0f
+
+#define DBG 1
+
+typedef struct{
+    char nome[MAXL];  // Nome dell'elemento
+    int tipo;         // Tipologia: 2 = avanti, 1 = indietro, 0 = di transizione
+    int dir_in;       // Direzione di ingresso: 1 = frontale, 0 = di spalle
+    int dir_out;      // Direzione di uscita: 1 = frontale, 0 = di spalle
+    int first;        // 0 = puo essere il primo, 1 = deve essere preceduto da un altro
+    int last;         // 1 = deve essere l'ultimo, 0 = puo non essere l'ultimo
+    float val;        // Valore dell'elemento
+    int diff;         // Difficolta dell'elemento
+}Elemento;
+
+typedef struct{
+    Elemento *data;
+    int len;
+}elemArray;
+
+typedef struct{
+    int elem[NELE]; // Indice degli elementi di questa diagonale
+    float val;      // Somma del valore degli elementi
+    int diff;       // Somma delle difficolta degli elementi
+    int fbacro[2];  // 0 = # acro avanti, 1 = # acro indietro
+    int dacro;      // 1 = due elementi acro di fila, 0 = no
+    int bonus;      // Genera bonus
+}Diag;
+
+typedef struct{
+    Diag *data;
+    int len;
+}diagArray;
+
+void generaDiagonale(elemArray, int, Diag*, Diag*, int, int);
+void generaProgramma(elemArray, int, int);
+
+int main(int argc, char *argv[]){
+    elemArray elem;
+    
+    int i, DD, DP;
+    
+    FILE *fp = fopen("elementi.txt", "r");
+    if(fp == NULL) exit(EXIT_FAILURE);
+    
+    fscanf(fp, "%d", &elem.len);
+    
+    elem.data = (Elemento*) malloc(elem.len * sizeof(Elemento));
+    if(elem.data == NULL) exit(EXIT_FAILURE);
+    
+    for(i = 0; i < elem.len; ++i)
+        fscanf(fp, "%s %d %d %d %d %d %f %d", elem.data[i].nome, &elem.data[i].tipo, &elem.data[i].dir_in, &elem.data[i].dir_out, &elem.data[i].first, &elem.data[i].last, &elem.data[i].val, &elem.data[i].diff);
+    fclose(fp);
+    
+    printf("Difficolta massima diagonale: ");
+    scanf("%d", &DD);
+    printf("Difficolta massima totale: ");
+    scanf("%d", &DP);
+    
+    generaProgramma(elem, DD, DP);
+    
+    free(elem.data);
+    
+    return 0;
+}
+
+void generaDiagonale(elemArray arr, int dd, Diag *diag, Diag *tmp, int index, int flag){
+    // TODO
+}
+
+// Complessita: O((#elementi ^ #elementixdiagonale) + (dd ^ #diag))
+void generaProgramma(elemArray arr, int dd, int dp){
+    int i, j, k, sol[NDIA] = {0};
+    float maxval = -1.0f, tmpval = 0.0f;
+    
+    diagArray d12, d3;
+    d12.len = d3.len = dd;
+    d12.data = (Diag*) malloc(dd * sizeof(Diag));
+    d3.data = (Diag*) malloc(dd * sizeof(Diag));
+    
+    Diag tmp;
+    tmp.diff = tmp.fbacro[0] = tmp.fbacro[1] = tmp.dacro = tmp.bonus = (int) (tmp.val = 0.0f);
+    for(i = 0; i < NELE; ++i) tmp.elem[i] = -1;
+    
+    for(i = 1; i < dd; ++i){
+        generaDiagonale(arr, i, &d12.data[i], &tmp, 0, 0);
+        generaDiagonale(arr, i, &d3.data[i], &tmp, 0, 1);
+    }
+    
+    for(i = 0; i < dd; ++i){
+        for(j = 0; j < dd; ++j){
+            for(k = 0; k < dd; ++k){
+                // Devo rispettare la difficolta massima
+                if(d12.data[i].diff + d12.data[j].diff + d3.data[k].diff >= dp) break;
+                // Devo avere almeno una acrobazia doppia
+                if(d12.data[i].dacro + d12.data[j].dacro + d3.data[k].dacro == 0) break;
+                // Devo avere almeno una acrobazia in avanti...
+                if(d12.data[i].fbacro[0] + d12.data[j].fbacro[0] + d3.data[k].fbacro[0] == 0) break;
+                // ... e una indietro
+                if(d12.data[i].fbacro[1] + d12.data[j].fbacro[1] + d3.data[k].fbacro[1] == 0) break;
+                
+                // Valore del programma
+                tmpval = d12.data[i].val + d12.data[j].val;
+                tmpval += (d3.data[i].val * ((d3.data[i].bonus == 1) ? 1.5 : 1.0));
+                
+                if(tmpval > maxval){
+                    maxval = tmpval;
+                    sol[0] = i;
+                    sol[1] = j;
+                    sol[2] = k;
+                }
+            }
+        }
+    }
+    
+    // Stampa risultati
+    printf("TOT = %f\n", maxval);
+    
+    printf("DIAG #1 > %f\n", d12.data[sol[0]].val);
+    for(i = 0; i < NELE; ++i){
+        if(d12.data[sol[0]].elem[i] == -1) break;
+        printf("%s ", arr.data[d12.data[sol[0]].elem[i]].nome);
+    }
+    printf("\n");
+    
+    printf("DIAG #2 > %f\n", d12.data[sol[1]].val);
+    for(i = 0; i < NELE; ++i){
+        if(d12.data[sol[1]].elem[i] == -1) break;
+        printf("%s ", arr.data[d12.data[sol[1]].elem[i]].nome);
+    }
+    printf("\n");
+    
+    printf("DIAG #3 > %f", d3.data[sol[2]].val);
+    if(d3.data[sol[2]].bonus == 1)
+        printf(" * 1.5 (BONUS)");
+    printf("\n");
+    for(i = 0; i < NELE; ++i){
+        if(d3.data[sol[2]].elem[i] == -1) break;
+        printf("%s ", arr.data[d12.data[sol[2]].elem[i]].nome);
+    }
+    printf("\n");
+    
+    free(d3.data);
+    free(d12.data);
+}
+*/
