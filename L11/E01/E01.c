@@ -239,8 +239,6 @@ void generaProgramma(elemArray arr, int dd, int dp){
 #define NELE 5
 #define BONUS 8.0f
 
-#define DBG 1
-
 typedef struct{
     char nome[MAXL];  // Nome dell'elemento
     int tipo;         // Tipologia: 2 = avanti, 1 = indietro, 0 = di transizione
@@ -266,11 +264,7 @@ typedef struct{
     int bonus;      // Genera bonus
 }Diag;
 
-typedef struct{
-    Diag *data;
-    int len;
-}diagArray;
-
+// Prototipi
 void generaDiagonale(elemArray, int, Diag*, Diag*, int, int);
 void generaProgramma(elemArray, int, int);
 
@@ -304,7 +298,74 @@ int main(int argc, char *argv[]){
 }
 
 void generaDiagonale(elemArray arr, int dd, Diag *diag, Diag *tmp, int index, int flag){
-    // TODO
+    int i, j;    
+
+    // Finito la diagonale
+    if(index >= NELE){
+        // Non ho acrobazie nella diagonale
+        if(tmp->fbacro[0] == 0 && tmp->fbacro[1] == 0)
+            return;
+
+        // Calcolo del bonus
+        if(flag == 1){
+            for(i = NELE-1; i >= 0; --i){
+                if(tmp->elem[i] != -1){
+                    if(arr.data[tmp->elem[i]].diff >= BONUS){
+                        tmp->bonus = 1;
+                        tmp->val *= 1.5;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Se migliore allora salvo
+        if(tmp->val > diag->val){
+            diag->val = tmp->val;
+            diag->diff = tmp->diff;
+            diag->fbacro[0] = tmp->fbacro[0];
+            diag->fbacro[1] = tmp->fbacro[1];
+            diag->dacro = tmp->dacro;
+            for(i = 0; i < NELE; ++i)
+                diag->elem[i] = tmp->elem[i];
+        }
+
+        return;
+    }
+    
+    // Ricorro
+    for(i = 0; i < arr.len; ++i){
+        if(index == 0 && arr.data[i].first == 1)
+            continue;
+        
+        // Aggiungo alla diagonale se posso
+        if((index == 0 && arr.data[i].dir_in == 1) || (index > 0 && ((!arr.data[tmp->elem[index-1]].dir_out ^ !arr.data[i].dir_in) == 0))){
+            // Aggiorno constraints e glob_tmp
+            tmp->diff += arr.data[i].diff;
+            tmp->fbacro[0] += (arr.data[i].tipo == 2);
+            tmp->fbacro[1] += (arr.data[i].tipo == 1);
+            tmp->val += arr.data[i].val;
+            tmp->elem[index] = i;
+            
+            // Ricorro
+            if(tmp->diff <= dd){
+                if(arr.data[i].last == 0 && tmp->diff < dd)
+                    generaDiagonale(arr, dd, diag, tmp, index+1, flag);
+                else
+                    generaDiagonale(arr, dd, diag, tmp, NELE, flag);
+            }
+            
+            // Backtrack
+            tmp->diff -= arr.data[i].diff;
+            tmp->fbacro[0] -= (arr.data[i].tipo == 2);
+            tmp->fbacro[1] -= (arr.data[i].tipo == 1);
+            tmp->val -= arr.data[i].val;
+            tmp->elem[index] = -1;
+        }
+    }
+
+    // Ricorri per controllare ottimalita
+    generaDiagonale(arr, dd, diag, tmp, NELE, flag);
 }
 
 // Complessita: O((#elementi ^ #elementixdiagonale) + (dd ^ #diag))
@@ -312,35 +373,36 @@ void generaProgramma(elemArray arr, int dd, int dp){
     int i, j, k, sol[NDIA] = {0};
     float maxval = -1.0f, tmpval = 0.0f;
     
-    diagArray d12, d3;
-    d12.len = d3.len = dd;
-    d12.data = (Diag*) malloc(dd * sizeof(Diag));
-    d3.data = (Diag*) malloc(dd * sizeof(Diag));
+    Diag *d12, *d3;
+    d12 = (Diag*) malloc(dd * sizeof(Diag));
+    d3 = (Diag*) malloc(dd * sizeof(Diag));
     
     Diag tmp;
-    tmp.diff = tmp.fbacro[0] = tmp.fbacro[1] = tmp.dacro = tmp.bonus = (int) (tmp.val = 0.0f);
-    for(i = 0; i < NELE; ++i) tmp.elem[i] = -1;
     
-    for(i = 1; i < dd; ++i){
-        generaDiagonale(arr, i, &d12.data[i], &tmp, 0, 0);
-        generaDiagonale(arr, i, &d3.data[i], &tmp, 0, 1);
+    for(i = 0; i < dd; ++i){
+        d12[i].val = d3[i].val = -1.0f;
+
+        tmp.diff = tmp.fbacro[0] = tmp.fbacro[1] = tmp.dacro = tmp.bonus = (int) (tmp.val = 0.0f);
+        for(j = 0; j < NELE; ++j) tmp.elem[j] = -1;
+
+        generaDiagonale(arr, i+1, &d12[i], &tmp, 0, 0);
+        generaDiagonale(arr, i+1, &d3[i], &tmp, 0, 1);
     }
     
     for(i = 0; i < dd; ++i){
-        for(j = 0; j < dd; ++j){
+        for(j = i; j < dd; ++j){ // Scambiare le prime due diagonali non cambia nulla
             for(k = 0; k < dd; ++k){
                 // Devo rispettare la difficolta massima
-                if(d12.data[i].diff + d12.data[j].diff + d3.data[k].diff >= dp) break;
+                if(d12[i].diff + d12[j].diff + d3[k].diff > dp) break;
                 // Devo avere almeno una acrobazia doppia
-                if(d12.data[i].dacro + d12.data[j].dacro + d3.data[k].dacro == 0) break;
+                if(d12[i].dacro + d12[j].dacro + d3[k].dacro == 0) break;
                 // Devo avere almeno una acrobazia in avanti...
-                if(d12.data[i].fbacro[0] + d12.data[j].fbacro[0] + d3.data[k].fbacro[0] == 0) break;
+                if(d12[i].fbacro[0] + d12[j].fbacro[0] + d3[k].fbacro[0] == 0) break;
                 // ... e una indietro
-                if(d12.data[i].fbacro[1] + d12.data[j].fbacro[1] + d3.data[k].fbacro[1] == 0) break;
+                if(d12[i].fbacro[1] + d12[j].fbacro[1] + d3[k].fbacro[1] == 0) break;
                 
                 // Valore del programma
-                tmpval = d12.data[i].val + d12.data[j].val;
-                tmpval += (d3.data[i].val * ((d3.data[i].bonus == 1) ? 1.5 : 1.0));
+                tmpval = d12[i].val + d12[j].val + d3[i].val;
                 
                 if(tmpval > maxval){
                     maxval = tmpval;
@@ -355,31 +417,31 @@ void generaProgramma(elemArray arr, int dd, int dp){
     // Stampa risultati
     printf("TOT = %f\n", maxval);
     
-    printf("DIAG #1 > %f\n", d12.data[sol[0]].val);
+    printf("DIAG #1 > %f\n", d12[sol[0]].val);
     for(i = 0; i < NELE; ++i){
-        if(d12.data[sol[0]].elem[i] == -1) break;
-        printf("%s ", arr.data[d12.data[sol[0]].elem[i]].nome);
+        if(d12[sol[0]].elem[i] == -1) break;
+        printf("%s ", arr.data[d12[sol[0]].elem[i]].nome);
     }
     printf("\n");
     
-    printf("DIAG #2 > %f\n", d12.data[sol[1]].val);
+    printf("DIAG #2 > %f\n", d12[sol[1]].val);
     for(i = 0; i < NELE; ++i){
-        if(d12.data[sol[1]].elem[i] == -1) break;
-        printf("%s ", arr.data[d12.data[sol[1]].elem[i]].nome);
+        if(d12[sol[1]].elem[i] == -1) break;
+        printf("%s ", arr.data[d12[sol[1]].elem[i]].nome);
     }
     printf("\n");
     
-    printf("DIAG #3 > %f", d3.data[sol[2]].val);
-    if(d3.data[sol[2]].bonus == 1)
+    printf("DIAG #3 > %f", d3[sol[2]].val);
+    if(d3[sol[2]].bonus == 1)
         printf(" * 1.5 (BONUS)");
     printf("\n");
     for(i = 0; i < NELE; ++i){
-        if(d3.data[sol[2]].elem[i] == -1) break;
-        printf("%s ", arr.data[d12.data[sol[2]].elem[i]].nome);
+        if(d3[sol[2]].elem[i] == -1) break;
+        printf("%s ", arr.data[d3[sol[2]].elem[i]].nome);
     }
     printf("\n");
     
-    free(d3.data);
-    free(d12.data);
+    free(d3);
+    free(d12);
 }
 */
