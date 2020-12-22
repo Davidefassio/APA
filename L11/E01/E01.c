@@ -199,10 +199,10 @@ void stampaSol(elemArray arr){
         l = j - 1;
     }
     
-    printf("TOT = %f\n", maxval);
+    printf("TOT = %.3f\n", maxval);
     
     for(i = 0; i < NDIA; ++i){
-        printf("DIAG #%d > %f", i+1, sum[i]);
+        printf("DIAG #%d > %.3f", i+1, sum[i]);
         
         if(i == 2 && arr.data[glob_sol[i][l]].diff >= BONUS)
             printf(" * 1.5 (BONUS)");
