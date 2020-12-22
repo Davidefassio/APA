@@ -6,8 +6,6 @@
 #define NELE 5
 #define BONUS 8.0f
 
-#define DBG 1
-
 typedef struct{
     char nome[MAXL];  // Nome dell'elemento
     int tipo;         // Tipologia: 2 = avanti, 1 = indietro, 0 = di transizione
