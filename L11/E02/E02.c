@@ -15,7 +15,7 @@ typedef struct{
     int last;         // 1 = deve essere l'ultimo, 0 = puo non essere l'ultimo
     float val;        // Valore dell'elemento
     int diff;         // Difficolta dell'elemento
-    float cost;       // Costo dell'elemento per l'algoritmo greedy
+    float gain;       // Guadagno dell'elemento per l'algoritmo greedy
 }Elemento;
 
 typedef struct{
@@ -27,64 +27,114 @@ typedef struct{
     int dd[NDIA];       // Difficolta massima per diagonale
     int dp;             // Difficolta massima del programma
     int acrxdiag[NDIA]; // Almeno un elemento acrobatico per diagonale
+    int dacro;          // Almeno due acro di fila nel programma
     int fbacro[2];      // Almeno un elemento acrobatico frontale e di spalle nel programma
 }Constr;
 
 
 // Variabili globali
-int glob_sol[NDIA][NELE]; // Soluzione ottimale.
-int glob_tmp[NDIA][NELE]; // Soluzione currente.
-float maxval = -1.0f;     // Valore della soluzione ottimale.
-float tmpval = 0.0f;     // Valore della soluzione corrente.
+int sol[NDIA][NELE];  // Soluzione ottimale.
+float solval = 0.0f;  // Valore della soluzione ottimale.
+Constr cons;          // Constraint
 
-
-float calcCosto(Elemento);
+// Prototipi
+float calcCosto(elemArray, Elemento, int, int);
 void stampaSol(elemArray);
-void generaProgramma(elemArray, int, int);
+void generaProgramma(elemArray);
+int cmp_elem(const void*, const void*);
 
 int main(int argc, char *argv[]){
-    elemArray elem;
+    elemArray elems;
     
-    int i, DD, DP;
-    
-    FILE *fp = fopen("elementi.txt", "r");
-    if(fp == NULL) exit(EXIT_FAILURE);
-    
-    fscanf(fp, "%d", &elem.len);
-    
-    elem.data = (Elemento*) malloc(elem.len * sizeof(Elemento));
-    if(elem.data == NULL) exit(EXIT_FAILURE);
-    
-    for(i = 0; i < elem.len; ++i){
-        fscanf(fp, "%s %d %d %d %d %d %f %d", elem.data[i].nome, &elem.data[i].tipo, &elem.data[i].dir_in, &elem.data[i].dir_out, &elem.data[i].first, &elem.data[i].last, &elem.data[i].val, &elem.data[i].diff);
-        // printf("%s %d %d %d %d %d %f %d\n", elem.data[i].nome, elem.data[i].tipo, elem.data[i].dir_in, elem.data[i].dir_out, elem.data[i].first, elem.data[i].last, elem.data[i].val, elem.data[i].diff);
-        
-        elem.data[i].cost = calcCosto(elem.data[i]);
-    }
-    fclose(fp);
-    
+    int i, j, DD, DP;
+
+    // Inizializzo sol a -1
+    for(i = 0; i < NDIA; ++i)
+        for(j = 0; j < NELE; ++j)
+            sol[i][j] = -1;
+
+    // Inserimento da tastiera delle difficolta massime
     printf("Difficolta massima diagonale: ");
     scanf("%d", &DD);
     printf("Difficolta massima totale: ");
     scanf("%d", &DP);
+
+    // Genero constraints
+    for(i = 0; i < NDIA; ++i){
+        cons.dd[i] = DD;
+        cons.acrxdiag[i] = 0;
+    }
+    cons.dp = DP;
+    cons.fbacro[0] = cons.fbacro[1] = cons.dacro = 0;
     
-    generaProgramma(elem, DD, DP);
+    // Lettura file
+    FILE *fp = fopen("elementi.txt", "r");
+    if(fp == NULL) exit(EXIT_FAILURE);
+    
+    fscanf(fp, "%d", &elems.len);
+    
+    elems.data = (Elemento*) malloc(elems.len * sizeof(Elemento));
+    if(elems.data == NULL) exit(EXIT_FAILURE);
+    
+    for(i = 0; i < elems.len; ++i){
+        fscanf(fp, "%s %d %d %d %d %d %f %d", elems.data[i].nome, &elems.data[i].tipo, &elems.data[i].dir_in, &elems.data[i].dir_out, &elems.data[i].first, &elems.data[i].last, &elems.data[i].val, &elems.data[i].diff);
+        elems.data[i].gain = calcCosto(elems, elems.data[i], 0, 0);
+        
+        // DEBUG
+        // printf("%s %d %d %d %d %d %f %d\n", elems.data[i].nome, elems.data[i].tipo, elems.data[i].dir_in, elems.data[i].dir_out, elems.data[i].first, elems.data[i].last, elems.data[i].val, elems.data[i].diff);
+    }
+    fclose(fp); /* elementi.txt */
+    
+    // Genera e stampa il programma
+    generaProgramma(elems);
     
     return 0;
 }
 
-// Da migliorare
-float calcCosto(Elemento elem){
-    return (elem.val / elem.diff) + ((elem.diff >= BONUS) ? 1 : 0) + ((elem.tipo > 0) ? 1 : 0);
+// Da modificare i gain.
+float calcCosto(elemArray elems, Elemento elem, int diag, int ind){
+    float gain = 0.0f;
+    
+    gain += (elem.val / elem.diff); // Guadagno specifico
+
+    if(cons.acrxdiag[diag] == 0 && elem.tipo > 0) 
+        gain += 1;  // Primo elemento acrobatico della diagonale
+    
+    if(cons.fbacro[1] == 0 && elem.dir_out == 0)
+        gain += 2 + ind*ind;  // Elemento con uscita di spalle 
+    
+    if(cons.dacro == 0 && ind > 0 && elems.data[sol[diag][ind-1]].tipo > 0 && elem.tipo > 0)
+        gain += 3 + ind*ind;  // Doppia acro
+
+    return gain;
+}
+
+void generaProgramma(elemArray elems){
+    int i, j, k;
+
+    qsort(elems.data, elems.len, sizeof(Elemento), cmp_elem);
+
+    for(j = 0; j < NELE; ++j){
+        for(i = 0; i < NDIA; ++i){
+
+        }
+    }
+}
+
+// Ordine decrescente sui gain
+int cmp_elem(const void *a, const void *b){
+    return (*(Elemento*)b).gain - (*(Elemento*)a).gain;
 }
 
 
 //              ### Roadmap algoritmo greedy ### 
-// Inserisco l'ultimo elemento in modo da ottenere il bonus, se possibile.
-// In parallelo da basso verso l'alto inserisco gli elementi.
-// Do un bonus al punteggio degli elementi che hanno dir_out 
-//      di spalle per invogliare il fbacro.
-// Do un bonus al concatenare due acro per avere il dacro.
-// Piu inserisco elementi piu alzo i due bonus precedenti.
+// X Guadagno = val / difficolta.
+// In parallelo dall'alto verso il basso inserisco gli elementi.
+// X Do un bonus al primo acro di una diag.
+// X Do un bonus al punteggio degli elementi che hanno dir_out 
+//      di spalle per invogliare il fbacro. (pesante)
+// X Do un bonus al concatenare due acro per avere il dacro.
+// X Piu inserisco elementi piu alzo i due bonus precedenti.
+// X Smetto di dare i bonus se ho soddisfatto il constraint.
 // Importante quindi ricalcolare e riordinare tutti gli elementi ancora prendibili
 //      ogni volta che se ne aggiunge uno.
