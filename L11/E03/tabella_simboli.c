@@ -1,9 +1,5 @@
 #include "tabella_simboli.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 
 /**
     Inizializza una nuova tabella di simboli.
@@ -14,7 +10,8 @@ TS* TS_init(){
     TS *tmp = (TS*) malloc(sizeof(TS));
     tmp->len = 0;
     tmp->cap = 1;
-    tmp->data = NULL;
+    tmp->data = (char**) malloc(sizeof(char*));
+    if(tmp->data == NULL) exit(EXIT_FAILURE);
     return tmp;
 }
 
@@ -58,6 +55,7 @@ int TS_deleteByIndex(TS *tab, int index){
     for(;index < (tab->len - 1); ++index)
         tab->data[index] = tab->data[index+1]; // Sposto
     tab->data[index] = NULL; // Cancello
+    --(tab->len);
     return 0; // Successo
 }
 

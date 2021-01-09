@@ -5,11 +5,14 @@
 #ifndef TABELLA_SIMBOLI_H_INCLUDED
 #define TABELLA_SIMBOLI_H_INCLUDED
 
+#include <stdlib.h>
+#include <string.h>
+
 // Definisco struttura dati
 typedef struct{
-    char **data;
-    int len;
-    int cap;
+    char **data; // Tabella
+    int len;     // Lunghezza
+    int cap;     // Capacita
 }TS;
 
 // Prototipi funzioni
