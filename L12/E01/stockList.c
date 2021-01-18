@@ -11,14 +11,14 @@ struct stockList{
 };
 
 // Node's functions
-Node* Node_new(Stock s){
+static Node* Node_new(Stock s){
     Node *tmp = (Node*) malloc(sizeof(Node));
     tmp->data = s;
     tmp->prev = tmp->next = NULL;
     return tmp;
 }
 
-void Node_free(Node *n){
+static void Node_free(Node *n){
     Stock_free(n->data);
     free(n);
 }
@@ -68,6 +68,14 @@ void SL_insert(StockList sl, Stock s){
     return;
 }
 
+void SL_insertFromFile(StockList sl, FILE *fp){
+    Stock tmp = NULL;
+    int n;
+    fscanf(fp, "%d", &n); // Salta il primo numero
+    while(Stock_fscan(fp, tmp) != 0)
+        SL_insert(sl, tmp);
+}
+
 Stock SL_search(StockList sl, char *str){
     Node *ptr = sl->head;
 
@@ -77,7 +85,7 @@ Stock SL_search(StockList sl, char *str){
         }
         ptr = ptr->next;
     }
-    return Stock_ItemVoid();
+    return Stock_ItemSetVoid();
 }
 
 void SL_delete(StockList sl, char *str){

@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 typedef struct{
     int pp; // Primi = minuti
@@ -13,9 +14,10 @@ typedef struct{
 }Data;
 
 // Prototipi
-int fscan_data(FILE*, Data*); // Acquisisci data da file
-void fprint_data(FILE*, Data); // Stampa data su file
-int cmp_data(Data, Data);
-int cmp_void_data(const void*, const void*); // Per il qsort
+int data_fscan(FILE*, Data*); // Acquisisci data da file
+void data_fprint(FILE*, Data); // Stampa data su file
+int data_cmp(Data, Data);
+Data data_getMin();
+Data data_getMax();
 
 #endif // DATA_H_INCLUDED

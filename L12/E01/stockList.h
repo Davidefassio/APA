@@ -10,7 +10,7 @@ typedef struct stockList* StockList;
 
 StockList SL_init();
 void SL_insert(StockList, Stock);
-void SL_insertFromFile(StockList, FILE*); // TODO
+void SL_insertFromFile(StockList, FILE*);
 Stock SL_search(StockList, char*);
 void SL_delete(StockList, char*);
 void SL_free(StockList);
