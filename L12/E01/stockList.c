@@ -80,9 +80,8 @@ void SL_insertFromFile(StockList sl, FILE *fp){
 
         tmp = SL_search(sl, cod);
 
-        if(Stock_getCode(tmp)[0] == '\0'){
-            Stock_free(tmp);
-            Stock_init(cod);
+        if(tmp == NULL){
+            tmp = Stock_init(cod);
             Stock_fscan(fp, tmp);
             SL_insert(sl, tmp);
         }
@@ -101,7 +100,7 @@ Stock SL_search(StockList sl, char *str){
         }
         ptr = ptr->next;
     }
-    return Stock_ItemSetVoid();
+    return NULL;
 }
 
 void SL_delete(StockList sl, char *str){

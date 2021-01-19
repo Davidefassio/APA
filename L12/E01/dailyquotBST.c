@@ -146,7 +146,9 @@ void BST_minmaxInterval(BST bst, Data d1, Data d2){
     qmax.avg = FLT_MIN;
     BST_minmaxR(bst->root, d1, d2);
 
+    printf("Min: ");
     DQ_fprint(stdout, qmin);
+    printf("Max: ");
     DQ_fprint(stdout, qmax);
 }
 
@@ -155,7 +157,9 @@ void BST_minmaxAll(BST bst){
     qmax.avg = FLT_MIN;
     BST_minmaxR(bst->root, data_getMin(), data_getMax());
 
+    printf("Min: ");
     DQ_fprint(stdout, qmin);
+    printf("Max: ");
     DQ_fprint(stdout, qmax);
 }
 
@@ -202,6 +206,7 @@ void BST_balance(BST bst, int S){
 }
 
 void BST_free(BST bst){
+    if(bst == NULL) return;
     freeR(bst->root);
     free(bst);
 }

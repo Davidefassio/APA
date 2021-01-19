@@ -1,12 +1,12 @@
 #include "dailyquot.h"
 
 int Trans_fscan(FILE *fp, Trans *t){
-    return data_fscan(fp, &t->day) + fscanf(fp, "%f %d", &t->value, &t->numb);
+    return data_fscan(fp, &(t->day)) + fscanf(fp, "%f %d", &t->value, &t->numb);
 }
 
 void DQ_fprint(FILE *fp, DailyQuot dq){
     data_fprint(fp, dq.day);
-    fprintf(fp, "Media: %f, #transazioni: %d\n", dq.avg, dq.ntrans);
+    fprintf(fp, " Media: %f, #transazioni: %d\n", dq.avg, dq.ntrans);
 }
 
 void DQ_addTrans(DailyQuot *dq, Trans t){

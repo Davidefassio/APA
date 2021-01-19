@@ -18,10 +18,10 @@ int data_cmp(Data d1, Data d2){
     if(d1.mm < d2.mm) return -1;
     if(d1.gg > d2.gg) return 1;
     if(d1.gg < d2.gg) return -1;
-    if(d1.hh > d2.hh) return 1;
+    /*if(d1.hh > d2.hh) return 1;
     if(d1.hh < d2.hh) return -1;
     if(d1.pp > d2.pp) return 1;
-    if(d1.pp < d2.pp) return -1;
+    if(d1.pp < d2.pp) return -1;*/
     return 0;
 }
 

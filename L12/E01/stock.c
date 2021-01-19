@@ -29,7 +29,7 @@ int Stock_cmp_cod(Stock s1, Stock s2){
 int Stock_fscan(FILE *fp, Stock s){
     if(fp == NULL) return 0;
 
-    Trans *t = NULL;
+    Trans *t = (Trans*) malloc(sizeof(Trans));
     DailyQuot *dq = NULL;
     int n, i, tot = 0;
 
@@ -49,19 +49,14 @@ int Stock_fscan(FILE *fp, Stock s){
         }
     }
 
+    free(t);
+
     return tot;
 }
 
 void Stock_fprint(FILE *fp, Stock s){
-    fprintf(fp, "Codice: %s", s->codice);
+    fprintf(fp, "Codice: %s\n", s->codice);
     BST_fprint(fp, s->dailyquot);
-}
-
-Stock Stock_ItemSetVoid(){
-    Stock tmp = (Stock) malloc(sizeof(struct stock));
-    tmp->codice[0] = '\0';
-    tmp->dailyquot = NULL;
-    return tmp;
 }
 
 void Stock_free(Stock s){

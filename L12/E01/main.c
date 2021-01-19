@@ -14,13 +14,13 @@ int main(int argc, char *argv[]){
     DailyQuot *dq;
 
     printf("Menu:\n");
-    printf(" 1) acquisisci da file;\n");
-    printf(" 2) ricerca titolo;\n");
-    printf(" 3) ricarca quotazione di un titolo in data;");
-    printf(" 4) ricerca quotazione massima e minima di un titolo in un intervallo di date;\n");
-    printf(" 5) ricerca quatazione massima e minima di un titolo;\n");
-    printf(" 6) bilancia BST;\n");
-    printf(" 0) esci.\n\n");
+    printf(" 1) acquisisci da file\n");
+    printf(" 2) ricerca titolo\n");
+    printf(" 3) ricarca quotazione di un titolo in data\n");
+    printf(" 4) ricerca quotazione massima e minima di un titolo in un intervallo di date\n");
+    printf(" 5) ricerca quatazione massima e minima di un titolo\n");
+    printf(" 6) bilancia BST\n");
+    printf(" 0) esci\n\n");
 
     while(1){
         printf("> ");
@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
         case 1:
             printf("Inserisci nome file: ");
             scanf("%s", nome);
+
             fp = fopen(nome, "r");
             if(fp == NULL){
                 printf("File non trovato.\n");
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]){
                 break;
             }
 
-            printf("Inserisci data: ");
+            printf("Inserisci data (aaaa/mm/gg hh:mm): ");
             data_fscan(stdin, &d1);
 
             dq = BST_search(Stock_getBST(stc), d1);
@@ -84,10 +85,10 @@ int main(int argc, char *argv[]){
                 break;
             }
 
-            printf("Inserisci data di inizio: ");
+            printf("Inserisci data di inizio (aaaa/mm/gg hh:mm): ");
             data_fscan(stdin, &d1);
 
-            printf("Inserisci data di fine: ");
+            printf("Inserisci data di fine (aaaa/mm/gg hh:mm): ");
             data_fscan(stdin, &d2);
 
             BST_minmaxInterval(Stock_getBST(stc), d1, d2);
@@ -123,6 +124,6 @@ int main(int argc, char *argv[]){
         printf("\n");
     }
 
-
+    // Non dovrei mai arrivare qua
     return 0;
 }

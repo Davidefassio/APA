@@ -16,7 +16,6 @@ BST Stock_getBST(Stock);
 int Stock_cmp_cod(Stock, Stock);
 int Stock_fscan(FILE*, Stock);
 void Stock_fprint(FILE*, Stock);
-Stock Stock_ItemSetVoid();
 void Stock_free(Stock);
 
 #endif // STOCK_H_INCLUDED
