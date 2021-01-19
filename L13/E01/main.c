@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
     fp = fopen(nome_file, "r");
     if(fp == NULL) exit(EXIT_FAILURE);
 
-    g = GRF_init(fp);
+    Grafo g = GRF_init(fp);
 
     fclose(fp);
 
