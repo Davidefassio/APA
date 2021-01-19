@@ -18,7 +18,8 @@ typedef struct{
 }DailyQuot;
 
 int Trans_fscan(FILE*, Trans*);
+void DQ_fprint(FILE*, DailyQuot);
 void DQ_addTrans(DailyQuot*, Trans);
-DailyQuot DQ_ItemSetVoid();
+DailyQuot* DQ_ItemSetVoid();
 
 #endif // DAILYQUOT_H_INCLUDED

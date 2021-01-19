@@ -3,13 +3,19 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "dailyquotBST.h"
+
+#define MAXL 21
 
 typedef struct stock* Stock;
 
 Stock Stock_init();
 char* Stock_getCode(Stock);
+BST Stock_getBST(Stock);
 int Stock_cmp_cod(Stock, Stock);
 int Stock_fscan(FILE*, Stock);
+void Stock_fprint(FILE*, Stock);
 Stock Stock_ItemSetVoid();
 void Stock_free(Stock);
 

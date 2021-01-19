@@ -70,10 +70,26 @@ void SL_insert(StockList sl, Stock s){
 
 void SL_insertFromFile(StockList sl, FILE *fp){
     Stock tmp = NULL;
-    int n;
-    fscanf(fp, "%d", &n); // Salta il primo numero
-    while(Stock_fscan(fp, tmp) != 0)
-        SL_insert(sl, tmp);
+    int n, i;
+    char cod[MAXL];
+
+    fscanf(fp, "%d", &n);
+
+    for(i = 0; i < n; ++i){
+        fscanf(fp, "%s", cod);
+
+        tmp = SL_search(sl, cod);
+
+        if(Stock_getCode(tmp)[0] == '\0'){
+            Stock_free(tmp);
+            Stock_init(cod);
+            Stock_fscan(fp, tmp);
+            SL_insert(sl, tmp);
+        }
+        else{
+            Stock_fscan(fp, tmp);
+        }
+    }
 }
 
 Stock SL_search(StockList sl, char *str){
