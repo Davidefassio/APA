@@ -41,6 +41,7 @@ int main(int argc, char *argv[]){
                 break;
             }
             SL_insertFromFile(sl, fp);
+            fclose(fp);
             break;
 
         case 2:
