@@ -2,8 +2,9 @@
 
 struct grf{
     int **madj; // Matrice delle adiacenze
-    int nnodi;
-    id *ts;
+    int nnodi;  // Numero di nodi
+    int narchi; // Numero di archi
+    id *ts;     // Tabella di simboli (nome <==> indice)
 };
 
 Grafo GRF_init(FILE *fp){
@@ -13,6 +14,7 @@ Grafo GRF_init(FILE *fp){
     Grafo tmp = (Grafo) malloc(sizeof(struct grf));
 
     fscanf(fp, "%d", &tmp->nnodi);
+    tmp->narchi = 0;
 
     // Alloco matrice e inizializzo a -1
     tmp->madj = (int**) malloc(tmp->nnodi * sizeof(int*));
@@ -36,6 +38,7 @@ Grafo GRF_init(FILE *fp){
         i = GRF_getNodeIndex(tmp, str1);
         j = GRF_getNodeIndex(tmp, str2);
         tmp->madj[i][j] = k;
+        ++(tmp->narchi);
     }
 
     return tmp;
