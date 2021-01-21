@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include <string.h>
 
-// Definisco un tipo che e' una stringa di MAXL caratteri
-#define MAXL 31
-typedef char id[MAXL];
+#include "tab_simb.h"
+#include "lista.h"
 
 typedef struct grf* Grafo;
 
 Grafo GRF_init(FILE*);
-int GRF_getNodeIndex(Grafo, id);
+void GRF_DAGify(Grafo);
+void GRF_printLongestPath(Grafo, int);
 void GRF_free(Grafo);
 
 
