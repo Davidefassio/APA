@@ -14,7 +14,7 @@ TS TS_init(int cap, int len){
     tmp->cap = cap;
     tmp->n = 0;
     tmp->len = len;
-    tmp->data = (char**) malloc(tmp->n * sizeof(char*));
+    tmp->data = (char**) malloc(tmp->cap * sizeof(char*));
     for(i = 0; i < tmp->cap; ++i){
         tmp->data[i] = (char*) malloc(tmp->len * sizeof(char));
         tmp->data[i][0] = '\0';

@@ -14,6 +14,7 @@ typedef struct lst* Lista;
 
 Lista L_init();
 void L_push(Lista, int, int);
+void L_pushNode(Lista, link);
 link L_extract(Lista, int);
 void L_free(Lista);
 

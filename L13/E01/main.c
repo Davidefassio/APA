@@ -16,6 +16,8 @@ int main(int argc, char *argv[]){
 
     fclose(fp);
 
+    GRF_DAGify(g);
+
     GRF_free(g);
 
     return 0;

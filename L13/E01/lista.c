@@ -38,12 +38,21 @@ void L_push(Lista lst, int id, int val){
     ++(lst->n);
 }
 
+void L_pushNode(Lista lst, link l){
+    l->next = lst->head;
+    lst->head = l;
+    ++(lst->n);
+}
+
 link L_extract(Lista lst, int id){
+    if(lst->head == NULL) return NULL;
+
     link ptr, tmp;
 
     if(lst->head->id == id){ // Estrazione in testa
         tmp = lst->head;
         lst->head = lst->head->next;
+        --(lst->n);
         return tmp;
     }
 
@@ -52,6 +61,7 @@ link L_extract(Lista lst, int id){
         if(ptr->next->id == id){
             tmp = ptr->next;
             ptr->next = ptr->next->next;
+            --(lst->n);
             return tmp;
         }
     }

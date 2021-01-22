@@ -4,15 +4,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "tab_simb.h"
 #include "lista.h"
+#include "mat.h"
 
 typedef struct grf* Grafo;
 
 Grafo GRF_init(FILE*);
 void GRF_DAGify(Grafo);
-void GRF_printLongestPath(Grafo, int);
+void GRF_printLongestPath(Grafo, int); // TODO
 void GRF_free(Grafo);
 
 
