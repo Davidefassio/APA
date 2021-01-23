@@ -103,7 +103,6 @@ static void genCombR(Mat m, long int *r, int *sol, int k, int n, int i){
     int c, p = (i == 0) ? -1 : sol[i-1];
 
     for(c = p+1; c <= n - k + i; ++c){
-        // printf("Row: %d, Pos: %d, Num: %d\n", *r, i, c);
         sol[i] = c;
         genCombR(m, r, sol, k, n, i+1);
     }
