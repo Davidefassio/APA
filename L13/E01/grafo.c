@@ -413,6 +413,10 @@ void GRF_free(Grafo grf){
 
     // Libero vettore di archi
     free(grf->varchi);
+    
+    // Libero ordinamento topologico se allocato
+    if(grf->ordtop != NULL)
+        free(grf->ordtop);
 
     // Libero tabella di simboli
     TS_free(grf->ts);
