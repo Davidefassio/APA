@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h>
 
 struct mat{
     int **data;
@@ -16,6 +15,5 @@ typedef struct mat* Mat;
 Mat M_init(long int, int);
 void M_print(Mat);
 void M_free(Mat);
-
 
 #endif // MAT_H_INCLUDED
