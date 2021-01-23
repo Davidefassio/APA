@@ -121,14 +121,101 @@ static Mat genComb(int n, int k){
     return tmp;
 }
 
-static void dfsR(){ // Depth first search
-    // TODO
+static int argmax(int *arr, int n){
+    int i, max = INT_MIN, imax = -1;
+    for(i = 0; i < n; ++i){
+        if(arr[i] > max){
+            max = arr[i];
+            imax = i;
+        }
+    }
+    return imax;
+}
+
+static int cmp_int(const void *p1, const void *p2){
+    return (*((int*)p1)) - (*((int*)p2));
+}
+
+static void dfsR(Mat pp, Grafo grf, int *prio, int *time, int id){ // Depth first search con priorita
+    link t;
+    int *tmp = (int*) malloc(grf->nnodi * sizeof(int));
+    int cnt = 0, i;
+
+    pp->data[0][id] = (*time)++;
+
+    for(t = L_getHead(grf->ladj[id]); t != NULL; t = Node_getNext(t)){
+        if(pp->data[0][Node_getId(t)] == -1){
+            tmp[cnt++] = Node_getId(t);
+        }
+    }
+
+    qsort(tmp, cnt, sizeof(int), cmp_int);
+
+    for(i = 0; i < cnt; ++i)
+        dfsR(pp, grf, prio, time, tmp[i]);
+
+    free(tmp);
+
+    pp->data[1][id] = (*time)++;
+}
+
+static void dfsRT(Mat pp, Grafo grf, int *time, int id){ // Depth first search sul grafo trasposto
+    link t;
+
+    pp->data[0][id] = (*time)++;
+
+    for(t = L_getHead(grf->ladjt[id]); t != NULL; t = Node_getNext(t))
+        if(pp->data[0][Node_getId(t)] == -1)
+            dfsRT(pp, grf, time, Node_getId(t));
+
+    pp->data[1][id] = (*time)++;
 }
 
 static int isDAG(Grafo grf){ // Implementazione dell'agoritmo di Kosaraju
-    // TODO
-    dfsR();
-    return 0;
+    int i, j;
+    Mat m1, m2;
+    m1 = M_init(2, grf->nnodi);
+    m2 = M_init(2, grf->nnodi);
+
+    for(i = 0; i < 2; ++i)
+        for(j = 0; j < m1->cols; ++j)
+            m1->data[i][j] = m2->data[i][j] = -1;
+
+    int *tmp = (int*) malloc(grf->nnodi * sizeof(int));
+    int *t = (int*) malloc(sizeof(int));
+    *t = 0;
+
+    for(i = 0; i < grf->nnodi; ++i)
+        if(m1->data[0][i] == -1)
+            dfsRT(m1, grf, t, i); // DFS sul grafo trasposto
+
+    memcpy(tmp, m1->data[1], grf->nnodi * sizeof(int));
+    *t = 0;
+
+    for(j = 0; j < grf->nnodi; ++j){
+        i = argmax(tmp, grf->nnodi); // Trovo il vertice con valore post massimo
+        tmp[i] = -1;
+
+        if(m2->data[0][i] == -1)
+            dfsR(m2, grf, m1->data[1], t, i); // DFS sul grafo seguendo la priorita m1->data[1]
+    }
+
+    free(t);
+    free(tmp);
+    M_free(m1);
+
+    // Se il grafo e' un DAG allora:
+    // per ogni nodo vale post[n] - pre[n] == 1
+    for(i = 0; i < m2->cols; ++i){
+        if(m2->data[1][i] - m2->data[0][i] != 1){
+            M_free(m2);
+            return 0; // NON e' un DAG
+        }
+    }
+
+    M_free(m2);
+
+    return 1; // E' un DAG
 }
 
 void GRF_DAGify(Grafo grf){
@@ -148,8 +235,6 @@ void GRF_DAGify(Grafo grf){
     // Ciclo le combinazioni (tolgo i archi)
     for(i = 1; i <= marchi && flag == 0; ++i){
         comb = genComb(grf->narchi, i);
-
-        M_print(comb); // DEBUG
 
         // Applico kosaraju togliendo gli archi
         nodeArr = (link*) realloc(nodeArr, i * sizeof(link));
@@ -190,13 +275,13 @@ void GRF_DAGify(Grafo grf){
         max = INT_MIN;
         imax = -1;
         for(i = 0; i < nvalid; ++i){
-            printf("%d) ", i+1);
+            printf("%d) {", i+1);
             sum = 0;
             for(k = 0; k < comb->cols; ++k){
-                printf("(%s, %s) ", TS_getNameByIndex(grf->ts, grf->varchi[comb->data[valid[i]][k]].u), TS_getNameByIndex(grf->ts, grf->varchi[comb->data[valid[i]][k]].v));
+                printf("(%s, %s)", TS_getNameByIndex(grf->ts, grf->varchi[comb->data[valid[i]][k]].u), TS_getNameByIndex(grf->ts, grf->varchi[comb->data[valid[i]][k]].v));
                 sum += grf->varchi[comb->data[valid[i]][k]].p;
             }
-            printf(". Peso = %d\n", sum);
+            printf("} Peso = %d\n", sum);
 
             if(sum > max){
                 max = sum;

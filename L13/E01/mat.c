@@ -17,7 +17,6 @@ Mat M_init(long int r, int c){
 
 void M_print(Mat m){
     long int i, j;
-    printf("###############\n"); // Da rimuovere
     printf("%ld %d\n", m->rows, m->cols);
     for(i = 0; i < m->rows; ++i){
         for(j = 0; j < m->cols; ++j){
@@ -25,7 +24,6 @@ void M_print(Mat m){
         }
         printf("\n");
     }
-    printf("###############\n"); // Da rimuovere
     printf("\n");
 }
 

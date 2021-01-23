@@ -15,6 +15,18 @@ link Node_new(int id, int val, link next){
     return tmp;
 }
 
+int Node_getId(link n){
+    return n->id;
+}
+
+int Node_getVal(link n){
+    return n->val;
+}
+
+link Node_getNext(link n){
+    return n->next;
+}
+
 void Node_free(link n){
     free(n);
 }
@@ -67,6 +79,10 @@ link L_extract(Lista lst, int id){
     }
 
     return NULL;
+}
+
+link L_getHead(Lista lst){
+    return lst->head;
 }
 
 static void freeR(link n){
