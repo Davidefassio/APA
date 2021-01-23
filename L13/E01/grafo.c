@@ -14,6 +14,7 @@ struct grf{
     int nnodi;    // Numero di nodi
     int narchi;   // Numero di archi
     edge *varchi; // Vettore degli archi ((u1, v1),(u2, v2),...)
+    int *ordtop;  // Ordinamento topologico
     TS ts;        // Tabella di simboli (nome <==> indice)
 };
 
@@ -23,6 +24,8 @@ Grafo GRF_init(FILE *fp){
 
     // Alloco grafo
     Grafo tmp = (Grafo) malloc(sizeof(struct grf));
+
+    tmp->ordtop = NULL; // Non e' un DAG
 
     fscanf(fp, "%d", &tmp->nnodi);
     tmp->narchi = 0;
@@ -70,6 +73,10 @@ Grafo GRF_init(FILE *fp){
     tmp->varchi = realloc(tmp->varchi, tmp->narchi * sizeof(edge));
 
     return tmp;
+}
+
+int GRF_getNumVert(Grafo grf){
+    return grf->nnodi;
 }
 
 /// DAGify ===================================================================
@@ -131,11 +138,14 @@ static int argmax(int *arr, int n){
     return imax;
 }
 
+static int *glob_prio = NULL;
 static int cmp_int(const void *p1, const void *p2){
-    return (*((int*)p1)) - (*((int*)p2));
+    return glob_prio[*((int*)p1)] - glob_prio[*((int*)p2)];
 }
 
 static void dfsR(Mat pp, Grafo grf, int *prio, int *time, int id){ // Depth first search con priorita
+    glob_prio = prio;
+
     link t;
     int *tmp = (int*) malloc(grf->nnodi * sizeof(int));
     int cnt = 0, i;
@@ -151,7 +161,8 @@ static void dfsR(Mat pp, Grafo grf, int *prio, int *time, int id){ // Depth firs
     qsort(tmp, cnt, sizeof(int), cmp_int);
 
     for(i = 0; i < cnt; ++i)
-        dfsR(pp, grf, prio, time, tmp[i]);
+        if(pp->data[0][tmp[i]] == -1)
+            dfsR(pp, grf, prio, time, tmp[i]);
 
     free(tmp);
 
@@ -181,25 +192,23 @@ static int isDAG(Grafo grf){ // Implementazione dell'agoritmo di Kosaraju
             m1->data[i][j] = m2->data[i][j] = -1;
 
     int *tmp = (int*) malloc(grf->nnodi * sizeof(int));
-    int *t = (int*) malloc(sizeof(int));
-    *t = 0;
+    int t = 0;
 
     for(i = 0; i < grf->nnodi; ++i)
         if(m1->data[0][i] == -1)
-            dfsRT(m1, grf, t, i); // DFS sul grafo trasposto
+            dfsRT(m1, grf, &t, i); // DFS sul grafo trasposto
 
     memcpy(tmp, m1->data[1], grf->nnodi * sizeof(int));
-    *t = 0;
+    t = 0;
 
     for(j = 0; j < grf->nnodi; ++j){
         i = argmax(tmp, grf->nnodi); // Trovo il vertice con valore post massimo
         tmp[i] = -1;
 
         if(m2->data[0][i] == -1)
-            dfsR(m2, grf, m1->data[1], t, i); // DFS sul grafo seguendo la priorita m1->data[1]
+            dfsR(m2, grf, m1->data[1], &t, i); // DFS sul grafo seguendo la priorita m1->data[1]
     }
 
-    free(t);
     free(tmp);
     M_free(m1);
 
@@ -313,7 +322,83 @@ void GRF_DAGify(Grafo grf){
     }
 }
 
-/// ==========================================================================
+/// Longest path =============================================================
+// Presuppone che il grafo sia gia un DAG
+void GRF_printLongestPath(Grafo grf, int id){
+    int i, j, v, w, index;
+    link ptr;
+
+    // Calcolo l'ordinamento topologico
+    if(grf->ordtop == NULL){
+        grf->ordtop = (int*) malloc(grf->nnodi * sizeof(int));
+        int *prio = (int*) calloc(grf->nnodi, sizeof(int));
+        int t = 0, index;
+        Mat pp = M_init(2, grf->nnodi);
+
+        for(i = 0; i < 2; ++i)
+            for(j = 0; j < grf->nnodi; ++j)
+                pp->data[i][j] = -1;
+
+        for(i = 0; i < grf->nnodi; ++i)
+            if(pp->data[0][i] == -1)
+                dfsR(pp, grf, prio, &t, i);
+
+        for(i = 0; i < grf->nnodi; ++i){
+            index = argmax(pp->data[1], pp->cols);
+            grf->ordtop[i] = index;
+            pp->data[1][index] = -1;
+        }
+
+        // Free
+        M_free(pp);
+        free(prio);
+    }
+
+    // Moltiplico per -1 i pesi degli archi
+    for(i = 0; i < grf->nnodi; ++i)
+        L_invertVal(grf->ladj[i]);
+
+    // Applico l'algoritmo dei cammini minimi
+    int *dist = (int*) malloc(grf->nnodi * sizeof(int));
+    for(i = 0; i < grf->nnodi; ++i)
+        dist[i] = INT_MAX;
+
+    for(j = 0; j < grf->nnodi; ++j) // Trovo la j da cui partire
+        if(id == grf->ordtop[j])
+            break;
+
+    dist[j] = 0;
+
+    for(i = j; i < grf->nnodi; ++i){
+        index = grf->ordtop[i];
+        if(dist[i] == INT_MAX)
+            continue;
+
+        for(ptr = L_getHead(grf->ladj[index]); ptr != NULL; ptr = Node_getNext(ptr)){
+            v = Node_getId(ptr);
+            w = Node_getVal(ptr);
+            if(dist[grf->ordtop[v]] > dist[i] + w)
+                dist[grf->ordtop[v]] = dist[i] + w;
+        }
+    }
+
+    // Stampo i risultati
+    printf("\nCammini massimi partendo da %s:\n", TS_getNameByIndex(grf->ts, id));
+    for(i = 0; i < grf->nnodi; ++i){
+        printf("%s) ", TS_getNameByIndex(grf->ts, grf->ordtop[i]));
+
+        if(dist[i] == INT_MAX)
+            printf("Vertice non raggiungibile\n");
+        else
+            printf("%d\n", -1*dist[i]);
+    }
+
+    // Rimetto i valori a posto
+    for(i = 0; i < grf->nnodi; ++i)
+        L_invertVal(grf->ladj[i]);
+
+    free(dist);
+}
 
 void GRF_free(Grafo grf){
     int i;

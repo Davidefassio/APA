@@ -3,6 +3,7 @@
 #include "grafo.h"
 
 int main(int argc, char *argv[]){
+    int i;
     char nome_file[31];
     FILE *fp;
 
@@ -16,7 +17,12 @@ int main(int argc, char *argv[]){
 
     fclose(fp);
 
+    printf("\n");
     GRF_DAGify(g);
+
+    printf("\n");
+    for(i = 0; i < GRF_getNumVert(g); ++i)
+        GRF_printLongestPath(g, i);
 
     GRF_free(g);
 

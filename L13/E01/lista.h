@@ -20,6 +20,7 @@ void L_push(Lista, int, int);
 void L_pushNode(Lista, link);
 link L_extract(Lista, int);
 link L_getHead(Lista);
+void L_invertVal(Lista);
 void L_free(Lista);
 
 #endif // LISTA_H_INCLUDED

@@ -85,6 +85,13 @@ link L_getHead(Lista lst){
     return lst->head;
 }
 
+void L_invertVal(Lista lst){
+    link ptr;
+
+    for(ptr = lst->head; ptr != NULL; ptr = ptr->next)
+        ptr->val *= -1;
+}
+
 static void freeR(link n){
     if(n == NULL) return;
     freeR(n->next);

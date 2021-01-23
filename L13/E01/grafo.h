@@ -13,8 +13,9 @@
 typedef struct grf* Grafo;
 
 Grafo GRF_init(FILE*);
+int GRF_getNumVert(Grafo);
 void GRF_DAGify(Grafo);
-void GRF_printLongestPath(Grafo, int); // TODO
+void GRF_printLongestPath(Grafo, int);
 void GRF_free(Grafo);
 
 
