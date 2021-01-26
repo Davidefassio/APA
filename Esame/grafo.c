@@ -50,6 +50,8 @@ PATH GRAPHpathLoad(Graph g, FILE *fp){
 
     fscanf(fp, "%d", &p->len); // Il file mi da la lunghezza del path
 
+    printf("%d\n", p->len);
+
     p->vert = (int*) malloc(p->len * sizeof(int));
 
     i = 0;
@@ -86,7 +88,7 @@ int GRAPHpathCheck(Graph g, PATH p, int M, int PF){
         }
     }
 
-    if(p->len != M && PF != 0 && p->vert[i] != 0) return 0;
+    if(p->len != M && PF != 0 && p->vert[i-1] != 0) return 0;
 
     p->pf = PF;
     p->val = val;

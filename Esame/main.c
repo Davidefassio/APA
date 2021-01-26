@@ -17,11 +17,26 @@ int main(int argc, char *argv[]){
 
     g = GRAPHload(fp);
 
-    PATH p = GRAPHpathBest(g, M, PF);
+    fclose(fp);
+
+    /*PATH p = GRAPHpathBest(g, M, PF);
+
+    for(i = 0; i < p->len; ++i)
+        printf("%d ", p->vert[i]);
+    printf("\n");*/
+
+    fp = fopen("path.txt", "r");
+    if(fp == NULL) exit(EXIT_FAILURE);
+
+    PATH p = GRAPHpathLoad(g, fp);
+
+    fclose(fp);
 
     for(i = 0; i < p->len; ++i)
         printf("%d ", p->vert[i]);
     printf("\n");
+
+    printf("%d\n", GRAPHpathCheck(g, p, M, PF));
 
     return 0;
 }
