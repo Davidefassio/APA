@@ -1,0 +1,22 @@
+7
+A 0 0 0
+B 1 0 2
+C 3 10 3
+D 2 5 4
+E 3 7 1
+F 1 5 8
+G 4 1 1
+A B 1
+A C 0
+A D 1
+E A 0
+A F 1
+B E 1
+B F 0
+C D 0
+C F 0
+D E 1
+G D 1
+E F 1
+E G 0
+G F 1
