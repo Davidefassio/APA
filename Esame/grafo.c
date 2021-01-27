@@ -2,9 +2,9 @@
 
 struct grf{
     Lista *ladj; // Vettore di liste
-    int nnodi;  // Numero di nodi nel grafo
-    int **vert; // Matrice [nnodi * 3] in cui per ogni nodo salvo (profondita, tesoro, oro)
-    TS ts;      // Tabella di simboli
+    int nnodi;   // Numero di nodi nel grafo
+    int **vert;  // Matrice [nnodi * 3] in cui per ogni nodo salvo (profondita, tesoro, oro)
+    TS ts;       // Tabella di simboli
 };
 
 Graph GRAPHload(FILE *fp){
@@ -97,6 +97,13 @@ int GRAPHpathCheck(Graph g, PATH p, int M, int PF){
         p->val += maxtes;
     }
 
+    if(g->vert[p->vert[p->len-1]][0] == 1)
+        p->val *= (2/3.0);
+    if(g->vert[p->vert[p->len-1]][0] == 2)
+        p->val *= 0.5;
+    if(g->vert[p->vert[p->len-1]][0] > 2)
+        p->val = 0;
+
     free(oro);
 
     return 1;
@@ -106,12 +113,6 @@ static PATH GRAPHpathBestR(Graph g, int M, int PF, PATH sol, PATH tmp, int *oro,
     int tmpval;
     if((i > 1 && tmp->vert[i-1] == 0) || tmp->pf <= 0 || i >= M){
         tmpval = tmp->val;
-        if(g->vert[tmp->vert[i-1]][0] == 1)
-            tmpval *= (2/3.0);
-        if(g->vert[tmp->vert[i-1]][0] == 2)
-            tmpval *= 0.5;
-        if(g->vert[tmp->vert[i-1]][0] > 2)
-            return sol; // Impresa fallita
 
         if(tes == -1){
             tmp->prstes = 0;
@@ -120,6 +121,13 @@ static PATH GRAPHpathBestR(Graph g, int M, int PF, PATH sol, PATH tmp, int *oro,
             tmp->prstes = 1;
             tmpval += tes;
         }
+
+        if(g->vert[tmp->vert[i-1]][0] == 1)
+            tmpval *= (2/3.0);
+        if(g->vert[tmp->vert[i-1]][0] == 2)
+            tmpval *= 0.5;
+        if(g->vert[tmp->vert[i-1]][0] > 2)
+            return sol; // Impresa fallita
 
         if(tmpval > sol->val){
             sol->val = tmpval;

@@ -6,7 +6,7 @@ int main(int argc, char *argv[]){
     if(argc != 3) return -1;
 
     int M, PF, s = 0;
-    char nome_file[31];
+    char nome_file[MAXL];
 
     sscanf(argv[1], "%d", &M);
     sscanf(argv[2], "%d", &PF);
