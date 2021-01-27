@@ -24,6 +24,7 @@ Graph GRAPHload(FILE*);
 PATH GRAPHpathLoad(Graph, FILE*);
 int GRAPHpathCheck(Graph, PATH, int, int);
 PATH GRAPHpathBest(Graph, int, int);
+void PATH_print(Graph, PATH);
 void GRAPH_free(Graph);
 void PATH_free(PATH);
 

@@ -50,8 +50,6 @@ PATH GRAPHpathLoad(Graph g, FILE *fp){
 
     fscanf(fp, "%d", &p->len); // Il file mi da la lunghezza del path
 
-    printf("%d\n", p->len);
-
     p->vert = (int*) malloc(p->len * sizeof(int));
 
     i = 0;
@@ -105,24 +103,26 @@ int GRAPHpathCheck(Graph g, PATH p, int M, int PF){
 }
 
 static PATH GRAPHpathBestR(Graph g, int M, int PF, PATH sol, PATH tmp, int *oro, int i, int tes){
+    int tmpval;
     if((i > 1 && tmp->vert[i-1] == 0) || tmp->pf <= 0 || i >= M){
-        if(g->vert[tmp->vert[i]][0] == 1)
-            tmp->val *= 2/3;
-        if(g->vert[tmp->vert[i]][0] == 2)
-            tmp->val *= 1/2;
-        if(g->vert[tmp->vert[i]][0] > 2)
-            tmp->val = 0;
+        tmpval = tmp->val;
+        if(g->vert[tmp->vert[i-1]][0] == 1)
+            tmpval *= (2/3.0);
+        if(g->vert[tmp->vert[i-1]][0] == 2)
+            tmpval *= 0.5;
+        if(g->vert[tmp->vert[i-1]][0] > 2)
+            return sol; // Impresa fallita
 
         if(tes == -1){
             tmp->prstes = 0;
         }
         else{
             tmp->prstes = 1;
-            tmp->val += tes;
+            tmpval += tes;
         }
 
-        if(tmp->val > sol->val){
-            sol->val = tmp->val;
+        if(tmpval > sol->val){
+            sol->val = tmpval;
             sol->len = tmp->len;
             sol->prstes = tmp->prstes;
             sol->pf = tmp->pf;
@@ -135,22 +135,23 @@ static PATH GRAPHpathBestR(Graph g, int M, int PF, PATH sol, PATH tmp, int *oro,
     int u, c, k, flag;
 
     // Traverso la lista dei nodi adiacenti
-    link ptr = Lista_getHead(g->ladj[tmp->vert[i]]);
+    link ptr = Lista_getHead(g->ladj[tmp->vert[i-1]]);
     for(; ptr != NULL; ptr = Node_getNext(ptr)){
         u = Node_getId(ptr);
         c = Node_getVal(ptr);
         flag = 0;
 
         // Modifico i valori
-        tmp->vert[i+1] = u;
+        tmp->vert[i] = u;
         tmp->pf += c;
         (tmp->len)++;
         if(oro[u] == 0){
             flag = 1;
+            oro[u] = 1;
             tmp->val += g->vert[u][2];
         }
         if(tes < g->vert[u][1])
-            k = g->vert[i][1];
+            k = g->vert[u][1];
         else
             k = tes;
 
@@ -158,11 +159,13 @@ static PATH GRAPHpathBestR(Graph g, int M, int PF, PATH sol, PATH tmp, int *oro,
         GRAPHpathBestR(g, M, PF, sol, tmp, oro, i+1, k);
 
         // Backtrack
-        if(flag == 1)
+        if(flag == 1){
             oro[u] = 0;
+            tmp->val -= g->vert[u][2];
+        }
         --(tmp->len);
         tmp->pf -= c;
-        tmp->vert[i+1] = 0;
+        tmp->vert[i] = 0;
     }
 
     return sol;
@@ -178,18 +181,30 @@ PATH GRAPHpathBest(Graph g, int M, int PF){
     sol->val = -1;
 
     tmp->vert[0] = 0;
-    tmp->len = 0;
-    tmp->val = 0;
+    tmp->len = 1;
+    tmp->val = g->vert[0][2];
     tmp->pf = PF;
 
     int *oro = (int*) calloc(g->nnodi, sizeof(int));
 
-    GRAPHpathBestR(g, M, PF, sol, tmp, oro, 0, -1);
+    oro[0] = 1;
+
+    GRAPHpathBestR(g, M, PF, sol, tmp, oro, 1, -1);
 
     PATH_free(tmp);
     free(oro);
 
     return sol;
+}
+
+void PATH_print(Graph g, PATH p){
+    int i;
+    printf("Lunghezza: %d\n", p->len);
+    printf("PF rimanenti: %d\n", p->pf);
+    printf("Valore: %d, Preso un tesoro: %s\n", p->val, (p->prstes == 0) ? "No" : "Si");
+    for(i = 0; i < p->len; ++i)
+        printf("%s ", TS_getName(g->ts, p->vert[i]));
+    printf("\n");
 }
 
 void GRAPH_free(Graph g){

@@ -5,7 +5,8 @@
 int main(int argc, char *argv[]){
     if(argc != 3) return -1;
 
-    int M, PF, i;
+    int M, PF, s = 0;
+    char nome_file[31];
 
     sscanf(argv[1], "%d", &M);
     sscanf(argv[2], "%d", &PF);
@@ -19,24 +20,29 @@ int main(int argc, char *argv[]){
 
     fclose(fp);
 
-    /*PATH p = GRAPHpathBest(g, M, PF);
+    PATH p;
 
-    for(i = 0; i < p->len; ++i)
-        printf("%d ", p->vert[i]);
-    printf("\n");*/
+    printf("Trovare il percorso migliore (1) oppure controllare un percorso (2) ?\n> ");
+    scanf("%d", &s);
 
-    fp = fopen("path.txt", "r");
-    if(fp == NULL) exit(EXIT_FAILURE);
+    if(s == 1){
+        p = GRAPHpathBest(g, M, PF);
+        PATH_print(g, p);
+    }
 
-    PATH p = GRAPHpathLoad(g, fp);
+    if(s == 2){
+        printf("Inserire nome file: ");
+        scanf("%s", nome_file);
 
-    fclose(fp);
+        fp = fopen("path.txt", "r");
+        if(fp == NULL) exit(EXIT_FAILURE);
 
-    for(i = 0; i < p->len; ++i)
-        printf("%d ", p->vert[i]);
-    printf("\n");
+        PATH p = GRAPHpathLoad(g, fp);
 
-    printf("%d\n", GRAPHpathCheck(g, p, M, PF));
+        printf("Percorso %s\n", (GRAPHpathCheck(g, p, M, PF) == 1) ? "corretto" : "irregolare");
+
+        PATH_print(g, p);
+    }
 
     return 0;
 }
